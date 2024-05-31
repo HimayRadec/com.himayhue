@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { SignIn } from "@/components/sign-in";
 
 export default function Home() {
   return (
@@ -15,7 +16,9 @@ export default function Home() {
       <div>
         Hello My Name Is Himay
       </div>
-      <Button>Click Me</Button>
+      <div className="border">
+        <SignIn />
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>

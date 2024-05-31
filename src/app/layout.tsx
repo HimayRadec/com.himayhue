@@ -26,7 +26,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <nav className="border">
+          <nav className="p-0 m-0">
             <MainNavigationMenu />
           </nav>
           {children}

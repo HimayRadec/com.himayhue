@@ -57,7 +57,7 @@ const components: { title: string; href: string; description: string }[] = [
 
 export function MainNavigationMenu() {
    return (
-      <Menubar className="justify-end">
+      <Menubar className="justify-end m-0">
 
          <MenubarMenu>
             <MenubarTrigger>Languages</MenubarTrigger>
