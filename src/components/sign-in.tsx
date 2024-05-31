@@ -1,5 +1,4 @@
-
-import { signIn } from "@/auth.ts"
+import { signIn } from "@/auth"
 
 export function SignIn() {
    return (

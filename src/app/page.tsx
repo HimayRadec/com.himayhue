@@ -9,15 +9,27 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { SignIn } from "@/components/sign-in";
+import { SignOut } from "@/components/signout-button";
+import { auth } from "@/auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>
-        Hello My Name Is Himay
+      <div className="flex flex-col items-center justify-center gap-1">
+        <Image
+          src={session?.user?.image ?? ''}
+          alt="logo"
+          width={200}
+          height={200}
+        />
+        <div>Hello my name is {session?.user?.name}</div>
+        <div>My email is {session?.user?.email}</div>
       </div>
       <div className="border">
-        <SignIn />
+        {session ? <SignOut /> : <SignIn />}
       </div>
       <Card>
         <CardHeader>
