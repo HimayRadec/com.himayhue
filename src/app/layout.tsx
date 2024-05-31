@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ModeToggle } from "@/components/modeToggle";
+import { MainNavigationMenu } from "@/components/navigationMenu";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,8 +26,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <nav>
-            <ModeToggle />
+          <nav className="border">
+            <MainNavigationMenu />
           </nav>
           {children}
         </ThemeProvider>
