@@ -1,4 +1,3 @@
-import Map from '@/components/Map'
 import React from 'react'
 
 function Places() {
@@ -6,7 +5,7 @@ function Places() {
       <div>
          Places
          <div>
-            <Map />
+            Map
          </div>
       </div>
    )
