@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { auth } from "@/auth";
+import { SignOut } from "@/components/ServerSignOut-Button";
 import {
   Card,
   CardContent,
@@ -8,9 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { SignIn } from "@/components/sign-in";
-import { SignOut } from "@/components/signout-button";
-import { auth } from "@/auth";
+
 
 export default async function Home() {
   const session = await auth();
@@ -28,9 +27,11 @@ export default async function Home() {
         <div>Hello my name is {session?.user?.name}</div>
         <div>My email is {session?.user?.email}</div>
       </div>
+
       <div className="border">
-        {session ? <SignOut /> : <SignIn />}
+        {session ? <SignOut /> : `<SignIn />`}
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>
