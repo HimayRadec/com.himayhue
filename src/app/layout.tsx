@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { MainNavigationMenu } from "@/components/navigationMenu";
-import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
+import NavBar from "@/components/NavBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +19,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
 
   return (
     <html lang="en">
@@ -30,10 +29,11 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <nav className="mr-1 ml-auto w-fit">
-            <MainNavigationMenu session={session} />
-          </nav>
-          {children}
+          <SessionProvider>
+            <NavBar />
+            {children}
+          </SessionProvider>
+
         </ThemeProvider>
       </body>
     </html>

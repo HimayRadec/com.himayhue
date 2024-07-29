@@ -2,7 +2,9 @@
 /*
 Created By: Himay 1/7/2024
 Last Edit By: Himay 1/7/2024
+TODO: I believe combining the auth.config.ts and auth.ts files into one file is more efficient and easier to manage.
 Description: This file checks if the user is authenticated and redirects appropriately.
+
 */
 
 import type { NextAuthConfig } from 'next-auth';
@@ -17,6 +19,7 @@ export const authConfig = {
          const path = nextUrl.pathname;
 
          // Paths that don't require authentication
+         // TODO: Add authorization to individual pages instead of paths
          const authorizationPaths = ['/login', '/register'];
 
          if (isLoggedIn) {
