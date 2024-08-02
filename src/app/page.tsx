@@ -1,19 +1,19 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { auth } from "@/auth"
 
+export default async function Page() {
+  const session = await auth()
 
-export default async function Home() {
-
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center">
+        Not authenticated
+      </div>
+    )
+  }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>Hello</div>
-    </main>
-  );
+    <div className="flex items-center justify-center">
+      <pre>{JSON.stringify(session, null, 2)}</pre>
+    </div>
+  )
 }

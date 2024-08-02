@@ -23,7 +23,5 @@ export default function NavBar() {
 }
 
 function SignInButton() {
-   return <Button >
-      <Link href="/signIn">Sign In</Link>
-   </Button>;
+   return <Button onClick={() => signIn()}>Sign in</Button>;
 }

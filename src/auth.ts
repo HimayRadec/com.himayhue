@@ -1,34 +1,15 @@
-import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import { authConfig } from './auth.config';
-import { getUserFromDb } from './queries/mongoQueries';
-import { z } from 'zod';
-import bcrypt from 'bcryptjs';
+// src/auth.ts
 
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import clientPromise from "@/lib/mongodb";
 
-export const { auth, signIn, signOut } = NextAuth({
+// Assuming the database name is stored in an environment variable
+const databaseName = "HimayHue";
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+   adapter: MongoDBAdapter(clientPromise, { databaseName }),
+   session: { strategy: "jwt" },
    ...authConfig,
-   providers: [
-      Credentials({
-         async authorize(credentials) {
-
-            const parsedCredentials = z
-               .object({ email: z.string().email(), password: z.string().min(6) })
-               .safeParse(credentials);
-
-            if (parsedCredentials.success) {
-               const { email, password } = parsedCredentials.data;
-               const user = await getUserFromDb(email);
-               if (!user) return null;
-               const passwordsMatch = await bcrypt.compare(password, user.password);
-
-               //TODO: Delete the password from the user object before returning it
-               if (passwordsMatch) return user;
-            }
-
-            console.log('Invalid credentials');
-            return null;
-         },
-      }),
-   ],
 });

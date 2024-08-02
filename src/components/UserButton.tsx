@@ -1,4 +1,3 @@
-import avatarPlaceholder from "@/assets/images/avatar_placeholder.png";
 import { Lock, LogOut, Settings } from "lucide-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -25,7 +24,7 @@ export default function UserButton({ user }: UserButtonProps) {
          <DropdownMenuTrigger asChild>
             <Button size="icon" className="flex-none rounded-full">
                <Image
-                  src={avatarPlaceholder}
+                  src='/avatar_placeholder.png'
                   alt="User profile picture"
                   width={50}
                   height={50}
