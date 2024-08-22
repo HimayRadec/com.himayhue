@@ -34,7 +34,7 @@
     ".next/types/**/*.ts",
     "src/auth.js",
     "src/lib/mongodb.js",
-    "src/components/GoogleMap.jsx"
+    "src/components/GoogleMap.tsx"
   ],
   "exclude": [
     "node_modules"

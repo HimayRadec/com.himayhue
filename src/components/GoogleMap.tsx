@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
-export default function Map() {
+export default function GoogleMapComponent() {
    const mapRef = useRef(null);
 
    useEffect(() => {
@@ -26,8 +26,8 @@ export default function Map() {
    }, []);
 
    return (
-      <div className="flex border justify-center items-center h-screen bg-black">
-         <div ref={mapRef} className="w-full max-w-4xl h-[500px] border-4 border-gray-300 shadow-lg"></div>
+      <div>
+         <div ref={mapRef} style={{ width: '100%', height: '500px' }}></div>
       </div>
    );
 }
