@@ -2,8 +2,56 @@
 import React, { useEffect, useRef } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+
+import { Button } from "@/components/ui/button"
+import {
+   Form,
+   FormControl,
+   FormDescription,
+   FormField,
+   FormItem,
+   FormLabel,
+   FormMessage,
+} from "@/components/ui/form"
+import { Input } from '@/components/ui/input';
+import { toast } from "@/components/ui/use-toast"
+
+const FormSchema = z.object({
+   searchInput: z.string().min(2, {
+      message: "Search must be at least 2 characters.",
+   }),
+})
+
 export default function Map() {
    const mapRef = useRef<HTMLDivElement>(null);
+
+   const form = useForm<z.infer<typeof FormSchema>>({
+      resolver: zodResolver(FormSchema),
+      defaultValues: {
+         searchInput: "",
+      },
+   })
+
+
+   function onSubmit(data: z.infer<typeof FormSchema>) {
+      toast({
+         title: "You submitted the following values:",
+         description: (
+            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+               <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+            </pre>
+         ),
+      })
+
+
+
+
+      console.log(`Search: ${data.searchInput}`);
+   }
+
 
    useEffect(() => {
       const loader = new Loader({
@@ -25,6 +73,7 @@ export default function Map() {
 
          const mapOptions: google.maps.MapOptions = {
             center: position,
+            mapTypeId: "terrain",
             zoom: 10,
             mapId: "a1079c9cea2794a7",
          };
@@ -43,9 +92,35 @@ export default function Map() {
       initMap();
    }, []);
 
+
    return (
-      <div className="flex border justify-center items-center h-screen bg-black">
-         <div ref={mapRef} className="w-full max-w-4xl h-[500px] border-4 border-gray-300 shadow-lg"></div>
+      <div className="flex flex-grow border-t">
+         <div ref={mapRef} className="google-map w-3/4"></div>
+
+         <div className='w-1/4 bg-neutral-950'>
+
+            <div className='p-4'>
+               <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-3">
+                     <FormField
+                        control={form.control}
+                        name="searchInput"
+                        render={({ field }) => (
+                           <FormItem>
+                              <FormControl>
+                                 <Input placeholder="Search Google Maps" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                           </FormItem>
+                        )}
+                     />
+                     <Button type="submit">Search</Button>
+                  </form>
+               </Form>
+            </div>
+
+         </div>
+
       </div>
    );
 }
