@@ -1,8 +1,8 @@
 'use client';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
-export default function GoogleMap() {
+export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    const mapRef = useRef<HTMLDivElement>(null);
 
    useEffect(() => {
@@ -52,9 +52,9 @@ export default function GoogleMap() {
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
       const request = {
-         textQuery: 'Tacos in Mountain View',
+         textQuery: { searchQuery },
          fields: ['displayName', 'location', 'businessStatus'],
-         includedType: 'restaurant',
+         // includedType: 'restaurant',
          locationBias: { lat: 37.4161493, lng: -122.0812166 },
          isOpenNow: true,
          language: 'en-US',

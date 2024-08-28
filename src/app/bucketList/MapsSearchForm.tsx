@@ -1,5 +1,5 @@
 'use client';
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -22,7 +22,15 @@ const FormSchema = z.object({
    }),
 })
 
-export default function MapsSearchForm() {
+export default function MapsSearchForm({ setMapSearchQuery }: { setMapSearchQuery: React.Dispatch<React.SetStateAction<string>> }) {
+   const [inputText, setInputText] = useState('');
+
+   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setInputText(event.target.value);
+
+      //run auto suggestion
+   };
+
 
    const form = useForm<z.infer<typeof FormSchema>>({
       resolver: zodResolver(FormSchema),
@@ -33,16 +41,9 @@ export default function MapsSearchForm() {
 
 
    function onSubmit(data: z.infer<typeof FormSchema>) {
-      toast({
-         title: "You submitted the following values:",
-         description: (
-            <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-               <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-            </pre>
-         ),
-      })
 
-
+      setMapSearchQuery(inputText); // Update the shared state
+      setInputText(''); // Reset the input field after submission
 
 
       console.log(`Search: ${data.searchInput}`);
@@ -58,7 +59,15 @@ export default function MapsSearchForm() {
                render={({ field }) => (
                   <FormItem>
                      <FormControl>
-                        <Input placeholder="Search Google Maps" {...field} />
+                        <Input
+                           placeholder="Search Google Maps"
+                           {...field}
+                           // Wrap field.onChange to handle additional state updates
+                           onChange={(event) => {
+                              field.onChange(event);  // Call React Hook Form's onChange
+                              setInputText(event.target.value);  // Update custom state
+                           }}
+                        />
                      </FormControl>
                      <FormMessage />
                   </FormItem>
