@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { toast } from "@/components/ui/use-toast"
 import { Input } from '@/components/ui/input';
 import {
    Form,
@@ -42,7 +41,7 @@ export default function MapsSearchForm({ setMapSearchQuery }: { setMapSearchQuer
 
    function onSubmit(data: z.infer<typeof FormSchema>) {
 
-      setMapSearchQuery(inputText); // Update the shared state
+      setMapSearchQuery(data.searchInput); // Update the shared state
       setInputText(''); // Reset the input field after submission
 
 

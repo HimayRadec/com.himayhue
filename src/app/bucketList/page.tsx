@@ -1,3 +1,4 @@
+'use client'
 import GoogleMap from '@/components/GoogleMap'
 import MapsSearchForm from './MapsSearchForm'
 import { useState } from 'react'

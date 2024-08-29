@@ -4,6 +4,8 @@ import { Loader } from "@googlemaps/js-api-loader";
 
 export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    const mapRef = useRef<HTMLDivElement>(null);
+   const mapInstanceRef = useRef<google.maps.Map | null>(null); // Keep map instance
+
 
    useEffect(() => {
       const loader = new Loader({
@@ -16,7 +18,7 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
 
          // Import the necessary libraries
          const { Map } = await loader.importLibrary("maps");
-         const { AdvancedMarkerElement, PinElement } = await loader.importLibrary("marker");
+         const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
          const position = {
             lat: 33.4484,
@@ -26,36 +28,44 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
          const mapOptions: google.maps.MapOptions = {
             center: position,
             mapTypeId: "terrain",
-            zoom: 10,
+            zoom: 15,
             mapId: "a1079c9cea2794a7",
          };
 
-         // Create the map
-         const map = new Map(mapRef.current as HTMLDivElement, mapOptions);
+         // Create the map if not already created
+         if (!mapInstanceRef.current) {
+            mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
+         }
 
          // Create an advanced marker
          new AdvancedMarkerElement({
-            map: map,
+            map: mapInstanceRef.current,
             position: position,
             title: "Title text for the marker at lat: 37.419, lng: -122.03",
          });
 
-         findPlaces(map);
+         findPlaces(mapInstanceRef.current);
       };
 
       initMap();
-   }, []);
+   }, []); // Only run this effect on mount
+
+   useEffect(() => {
+      if (mapInstanceRef.current) {
+         findPlaces(mapInstanceRef.current); // Re-run the place search when searchQuery changes
+      }
+   }, [searchQuery]); // Re-run the effect when searchQuery changes
 
    async function findPlaces(map: google.maps.Map) {
-      console.log('Finding places...');
+      console.log('Searching for places: ', searchQuery);
 
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
       const request = {
-         textQuery: { searchQuery },
+         textQuery: searchQuery,
          fields: ['displayName', 'location', 'businessStatus'],
          // includedType: 'restaurant',
-         locationBias: { lat: 37.4161493, lng: -122.0812166 },
+         // locationBias: { lat: 37.4161493, lng: -122.0812166 },
          isOpenNow: true,
          language: 'en-US',
          maxResultCount: 8,
@@ -86,6 +96,7 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
          });
 
          map.fitBounds(bounds);
+         map.setZoom(15);
 
       }
       else {
