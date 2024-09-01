@@ -2,18 +2,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
-export default function GoogleMap({
-   searchQuery }:
-   { searchQuery: string }) {
-
+export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    const mapRef = useRef<HTMLDivElement>(null);
-   const mapInstanceRef = useRef<google.maps.Map | null>(null); // Keep map instance
+   const mapInstanceRef = useRef<google.maps.Map | null>(null);
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
 
    useEffect(() => {
       const loader = new Loader({
          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-         version: "weekly", // Ensure you're using the latest version
+         version: "weekly",
       });
 
       const initMap = async () => {
@@ -23,9 +20,8 @@ export default function GoogleMap({
          const { Map } = await loader.importLibrary("maps");
          const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
-
          const mapOptions: google.maps.MapOptions = {
-            center: currentLocation || { lat: 33.4484, lng: -112.0740 },
+            center: currentLocation || { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco if location is not set
             mapTypeId: "terrain",
             zoom: 15,
             mapId: "a1079c9cea2794a7",
@@ -34,16 +30,19 @@ export default function GoogleMap({
          // Create the map if not already created
          if (!mapInstanceRef.current) {
             mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
+         } else if (currentLocation) {
+            mapInstanceRef.current.setCenter(currentLocation);
          }
 
-         // Create an advanced marker
+         // Create an advanced marker if currentLocation is available
          if (currentLocation) {
-            new AdvancedMarkerElement({
+            const marker = new AdvancedMarkerElement({
                map: mapInstanceRef.current,
                position: currentLocation,
                title: "Current Location",
-            });
+            })
          };
+
 
          // findPlaces(mapInstanceRef.current);
          getCurrentLocation();
