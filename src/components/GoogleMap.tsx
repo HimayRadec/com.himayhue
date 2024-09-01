@@ -1,11 +1,16 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
+import { get } from 'http';
 
 export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    const mapRef = useRef<HTMLDivElement>(null);
    const mapInstanceRef = useRef<google.maps.Map | null>(null);
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
+
+   useEffect(() => {
+      getCurrentLocation();
+   }, []);
 
    useEffect(() => {
       const loader = new Loader({
@@ -16,21 +21,20 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       const initMap = async () => {
          if (!mapRef.current) return;
 
-         // Import the necessary libraries
          const { Map } = await loader.importLibrary("maps");
          const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
          const mapOptions: google.maps.MapOptions = {
-            center: currentLocation || { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco if location is not set
+            center: currentLocation || { lat: 37.7749, lng: -122.4194 },
             mapTypeId: "terrain",
             zoom: 15,
             mapId: "a1079c9cea2794a7",
          };
 
-         // Create the map if not already created
          if (!mapInstanceRef.current) {
             mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
-         } else if (currentLocation) {
+         }
+         else if (currentLocation) {
             mapInstanceRef.current.setCenter(currentLocation);
          }
 
@@ -42,23 +46,19 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
                title: "Current Location",
             })
          };
-
-
-         // findPlaces(mapInstanceRef.current);
-         getCurrentLocation();
-
       };
 
       initMap();
+      // searchOnGoogleMap(mapInstanceRef.current);
    }, [currentLocation]);
 
    useEffect(() => {
       if (mapInstanceRef.current) {
-         findPlaces(mapInstanceRef.current); // Re-run the place search when searchQuery changes
+         searchOnGoogleMap(mapInstanceRef.current); // Re-run the place search when searchQuery changes
       }
    }, [searchQuery]); // Re-run the effect when searchQuery changes
 
-   async function findPlaces(map: google.maps.Map) {
+   async function searchOnGoogleMap(map: google.maps.Map) {
       console.log('Searching for places: ', searchQuery);
 
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
