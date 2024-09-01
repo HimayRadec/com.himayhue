@@ -2,10 +2,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
-export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
+export default function GoogleMap({
+   searchQuery }:
+   { searchQuery: string }) {
+
    const mapRef = useRef<HTMLDivElement>(null);
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Keep map instance
-
+   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
 
    useEffect(() => {
       const loader = new Loader({
@@ -20,13 +23,9 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
          const { Map } = await loader.importLibrary("maps");
          const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
-         const position = {
-            lat: 33.4484,
-            lng: -112.0740,
-         };
 
          const mapOptions: google.maps.MapOptions = {
-            center: position,
+            center: currentLocation || { lat: 33.4484, lng: -112.0740 },
             mapTypeId: "terrain",
             zoom: 15,
             mapId: "a1079c9cea2794a7",
@@ -38,17 +37,21 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
          }
 
          // Create an advanced marker
-         new AdvancedMarkerElement({
-            map: mapInstanceRef.current,
-            position: position,
-            title: "Title text for the marker at lat: 37.419, lng: -122.03",
-         });
+         if (currentLocation) {
+            new AdvancedMarkerElement({
+               map: mapInstanceRef.current,
+               position: currentLocation,
+               title: "Current Location",
+            });
+         };
 
-         findPlaces(mapInstanceRef.current);
+         // findPlaces(mapInstanceRef.current);
+         getCurrentLocation();
+
       };
 
       initMap();
-   }, []); // Only run this effect on mount
+   }, [currentLocation]);
 
    useEffect(() => {
       if (mapInstanceRef.current) {
@@ -64,12 +67,8 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       const request = {
          textQuery: searchQuery,
          fields: ['displayName', 'location', 'businessStatus'],
-         // includedType: 'restaurant',
-         // locationBias: { lat: 37.4161493, lng: -122.0812166 },
-         isOpenNow: true,
          language: 'en-US',
          maxResultCount: 8,
-         minRating: 3.2,
          region: 'us',
          useStrictTypeFiltering: false,
       };
@@ -104,6 +103,23 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       }
    }
 
+   const getCurrentLocation = () => {
+      if (navigator.geolocation) {
+         navigator.geolocation.getCurrentPosition(
+            (position) => {
+               setCurrentLocation({
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+               });
+            },
+            (error) => {
+               console.error("Error getting location:", error);
+            }
+         );
+      } else {
+         console.error("Geolocation is not supported by this browser.");
+      }
+   };
 
    return (
       <div ref={mapRef} className="google-map w-full"></div>
