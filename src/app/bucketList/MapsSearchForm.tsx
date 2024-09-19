@@ -21,16 +21,15 @@ const FormSchema = z.object({
    }),
 })
 
-export default function MapsSearchForm({ setMapSearchQuery }: { setMapSearchQuery: React.Dispatch<React.SetStateAction<string>> }) {
+interface MapsSearchFormProps {
+   setMapSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+}
+
+export default function MapsSearchForm({ setMapSearchQuery }: MapsSearchFormProps) {
    const [inputText, setInputText] = useState('');
 
-   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setInputText(event.target.value);
 
-      //run auto suggestion
-   };
-
-
+   // Validation and form state management
    const form = useForm<z.infer<typeof FormSchema>>({
       resolver: zodResolver(FormSchema),
       defaultValues: {

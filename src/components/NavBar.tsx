@@ -15,7 +15,11 @@ export default function NavBar() {
             <Link href="/" className="font-bold">
 
             </Link>
-            {user && <UserButton user={user} />}
+            <div className="flex items-center gap-3">
+               {user && user.name}
+               {user && <UserButton user={user} />}
+            </div>
+
             {!user && session.status !== "loading" && <SignInButton />}
          </nav>
       </header>
