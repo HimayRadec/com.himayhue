@@ -1,6 +1,5 @@
 'use client'
 import GoogleMap from '@/components/GoogleMap'
-import Image from 'next/image'
 import MapsSearchForm from './MapsSearchForm'
 import { useEffect, useState } from 'react'
 
@@ -18,27 +17,14 @@ export default function BucketList() {
     <div className='flex flex-grow border-t'>
       <GoogleMap searchQuery={mapSearchQuery} />
 
-      <div className='w-1/4 bg-neutral-950 flex flex-col'>
-        <div className='p-4 border-4'>
+      <div className="w-1/3 bg-neutral-950 flex">
+        <div className="p-4 w-3/5">
           <MapsSearchForm setMapSearchQuery={setMapSearchQuery} />
-          <p>Search Query: {mapSearchQuery}</p>
-          <p>Data from results {searchResultsData}</p>
         </div>
 
-        <div className='border-2'>
-          Search Results
-          {<Image
-            src="/avatar_placeholder.png"
-            alt="User profile picture"
-            width={200}
-            height={300}
-          />}
+        <div className="border-l-2 p-4 w-2/5 flex-col items-center">
+          <h2 className="text-center text-3xl text-bold">Bucket List</h2>
         </div>
-
-        <div className='border-2'>
-          <h2 className=''>Bucket List</h2>
-        </div>
-
       </div>
 
     </div>

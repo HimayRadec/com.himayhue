@@ -1,17 +1,28 @@
 'use client';
 import React, { use, useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
-import { get } from 'http';
 
 export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    const mapRef = useRef<HTMLDivElement>(null);
    const mapInstanceRef = useRef<google.maps.Map | null>(null);
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
+   const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
 
+   const [mapOptions, setMapOptions] = useState<google.maps.MapOptions>({
+      center: { lat: 37.7749, lng: -122.4194 },
+      mapTypeId: "terrain",
+      zoom: 15,
+      mapId: "a1079c9cea2794a7",
+   });
+
+
+   // Asks for the user's location
    useEffect(() => {
       getCurrentLocation();
    }, []);
 
+
+   // Create Map
    useEffect(() => {
       const loader = new Loader({
          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
@@ -19,50 +30,36 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       });
 
       const initMap = async () => {
+         // Checks for an element with the ref mapRef
          if (!mapRef.current) return;
 
          const { Map } = await loader.importLibrary("maps");
-         const { AdvancedMarkerElement } = await loader.importLibrary("marker");
 
-         const mapOptions: google.maps.MapOptions = {
-            center: currentLocation || { lat: 37.7749, lng: -122.4194 },
-            mapTypeId: "terrain",
-            zoom: 15,
-            mapId: "a1079c9cea2794a7",
-         };
+         // Create a new map instance if it doesn't exist
+         if (!mapInstanceRef.current) mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
 
-         if (!mapInstanceRef.current) {
-            mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
-         }
-         else if (currentLocation) {
-            mapInstanceRef.current.setCenter(currentLocation);
-         }
-
-         // Create an advanced marker if currentLocation is available
+         // Sets the center of the map to the current location and adds a marker
          if (currentLocation) {
-            const marker = new AdvancedMarkerElement({
-               map: mapInstanceRef.current,
-               position: currentLocation,
-               title: "Current Location",
-            })
+
+            updateLocationCircle(currentLocation);
+            updateMapCenter(currentLocation);
+            mapInstanceRef.current.setCenter(currentLocation);
          };
       };
 
       initMap();
-      // searchOnGoogleMap(mapInstanceRef.current);
    }, [currentLocation]);
 
    useEffect(() => {
       if (mapInstanceRef.current) {
-         searchOnGoogleMap(mapInstanceRef.current); // Re-run the place search when searchQuery changes
+         searchOnGoogleMap(mapInstanceRef.current);
       }
-   }, [searchQuery]); // Re-run the effect when searchQuery changes
+   }, [searchQuery]);
 
    async function searchOnGoogleMap(map: google.maps.Map) {
-      console.log('Searching for places: ', searchQuery);
-
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+
       const request = {
          textQuery: searchQuery,
          fields: ['displayName', 'location', 'businessStatus'],
@@ -72,7 +69,9 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
          useStrictTypeFiltering: false,
       };
 
-      //@ts-ignore
+      console.log('Searching for places: ', searchQuery);
+
+      // Stores the results of the search in the places variable
       const { places } = await Place.searchByText(request);
 
       if (places.length) {
@@ -90,7 +89,8 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
             });
 
             bounds.extend(place.location as google.maps.LatLng);
-            console.log(place);
+            console.log(`found place: ${place.displayName}`);
+            console.log(place.toJSON());
          });
 
          map.fitBounds(bounds);
@@ -115,10 +115,39 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
                console.error("Error getting location:", error);
             }
          );
-      } else {
+      }
+      else {
          console.error("Geolocation is not supported by this browser.");
       }
    };
+
+   function updateLocationCircle(newCenter: google.maps.LatLngLiteral) {
+      if (locationCircle) {
+         locationCircle.setCenter(newCenter);
+      }
+      else {
+         // Create a new location circle
+         const newCircle = new google.maps.Circle({
+            strokeColor: "#ffffff",
+            fillColor: "#75aaff",
+            fillOpacity: 1,
+            map: mapInstanceRef.current,
+            center: newCenter,
+            radius: 5,
+         });
+
+
+         setLocationCircle(newCircle);
+      }
+   }
+
+   function updateMapCenter(newCenter: google.maps.LatLngLiteral) {
+      setMapOptions((prevOptions) => ({
+         ...prevOptions,
+         center: newCenter,
+      }));
+   }
+
 
    return (
       <div ref={mapRef} className="google-map w-full"></div>
