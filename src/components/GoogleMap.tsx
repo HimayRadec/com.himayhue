@@ -51,7 +51,7 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
    }, [currentLocation]);
 
    useEffect(() => {
-      if (mapInstanceRef.current) {
+      if (mapInstanceRef.current && searchQuery) {
          searchOnGoogleMap(mapInstanceRef.current);
       }
    }, [searchQuery]);
