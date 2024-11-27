@@ -2,9 +2,22 @@
 import React, { use, useEffect, useRef, useState } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
-export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
-   const mapRef = useRef<HTMLDivElement>(null);
-   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+interface GoogleMapProps {
+   searchQuery: string;
+   setSearchResultsDetails: React.Dispatch<React.SetStateAction<string>>;
+}
+
+/**
+ * Google map component that displays a map centered on the user's location and a blue location circle.
+ * If a search query is provided, it will search for places on the map and drop markers on the locations.
+ * If the user has an existing bucket list, it will drop markers on the locations.
+ * 
+ * @param searchQuery - The search query to search for places on the map.
+ * @returns JSX.Element GoogleMap
+ */
+export default function GoogleMap({ searchQuery, setSearchResultsDetails }: GoogleMapProps) {
+   const mapElement = useRef<HTMLDivElement>(null); // Reference to the map div element
+   const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
 
@@ -31,12 +44,12 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
 
       const initMap = async () => {
          // Checks for an element with the ref mapRef
-         if (!mapRef.current) return;
+         if (!mapElement.current) return;
 
          const { Map } = await loader.importLibrary("maps");
 
          // Create a new map instance if it doesn't exist
-         if (!mapInstanceRef.current) mapInstanceRef.current = new Map(mapRef.current as HTMLDivElement, mapOptions);
+         if (!mapInstanceRef.current) mapInstanceRef.current = new Map(mapElement.current as HTMLDivElement, mapOptions);
 
          // Sets the center of the map to the current location and adds a marker
          if (currentLocation) {
@@ -60,6 +73,7 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
+      // Create a new request object with the search query
       const request = {
          textQuery: searchQuery,
          fields: ['displayName', 'location', 'businessStatus'],
@@ -70,7 +84,6 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
       };
 
       console.log('Searching for places: ', searchQuery);
-
       // Stores the results of the search in the places variable
       const { places } = await Place.searchByText(request);
 
@@ -95,6 +108,8 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
 
          map.fitBounds(bounds);
          map.setZoom(15);
+
+         setSearchResultsDetails(`Found ${places[0].displayName} places`);
 
       }
       else {
@@ -150,6 +165,6 @@ export default function GoogleMap({ searchQuery }: { searchQuery: string }) {
 
 
    return (
-      <div ref={mapRef} className="google-map w-full"></div>
+      <div ref={mapElement} className="google-map w-full"></div>
    )
 }
