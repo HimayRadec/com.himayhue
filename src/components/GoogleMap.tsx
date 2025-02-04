@@ -1,10 +1,12 @@
 'use client';
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
 interface GoogleMapProps {
    searchQuery: string;
-   setSearchResultsDetails: React.Dispatch<React.SetStateAction<string>>;
+   setSearchResultsDetails: Dispatch<SetStateAction<string>>;
+   setPlaces: Dispatch<SetStateAction<google.maps.places.PlaceResult[]>>;
+
 }
 
 /**
@@ -15,7 +17,7 @@ interface GoogleMapProps {
  * @param searchQuery - The search query to search for places on the map.
  * @returns JSX.Element GoogleMap
  */
-export default function GoogleMap({ searchQuery, setSearchResultsDetails }: GoogleMapProps) {
+export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPlaces }: GoogleMapProps) {
    const mapElement = useRef<HTMLDivElement>(null); // Reference to the map div element
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
@@ -69,14 +71,15 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails }: Goog
       }
    }, [searchQuery]);
 
+
    async function searchOnGoogleMap(map: google.maps.Map) {
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
       const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
-      // Create a new request object with the search query
+      // Here is where you pass the parameters for the search request
       const request = {
          textQuery: searchQuery,
-         fields: ['displayName', 'location', 'businessStatus'],
+         fields: ['addressComponents', 'displayName', 'location', 'businessStatus'],
          language: 'en-US',
          maxResultCount: 8,
          region: 'us',
@@ -84,6 +87,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails }: Goog
       };
 
       console.log('Searching for places: ', searchQuery);
+
       // Stores the results of the search in the places variable
       const { places } = await Place.searchByText(request);
 
@@ -93,29 +97,33 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails }: Goog
          const { LatLngBounds } = await google.maps.importLibrary("core") as google.maps.CoreLibrary;
          const bounds = new LatLngBounds();
 
-         // Loop through and get all the results.
-         places.forEach((place) => {
-            const markerView = new AdvancedMarkerElement({
-               map,
-               position: place.location,
-               title: place.displayName,
-            });
+         console.log(`[GoogleMap.tsx]: Displaying results for ${searchQuery}`);
 
-            bounds.extend(place.location as google.maps.LatLng);
-            console.log(`found place: ${place.displayName}`);
-            console.log(place.toJSON());
+         // Collect all the places into a new array
+         const newPlaces: google.maps.places.PlaceResult[] = places.map((place) => {
+            // Ensure place has a location property
+            if (place.location) {
+               bounds.extend(place.location as google.maps.LatLng);
+            }
+
+            console.log(`[GoogleMap.tsx]:`, JSON.stringify(place, null, 2));
+
+            // Return the place directly or transform it if necessary
+            return place as google.maps.places.PlaceResult;
          });
+
+         // Update the places state once, after the loop
+         setPlaces(newPlaces);
 
          map.fitBounds(bounds);
          map.setZoom(15);
 
-         setSearchResultsDetails(`Found ${places[0].displayName} places`);
-
-      }
-      else {
+         setSearchResultsDetails(`Found ${places.length} results for ${places[0].displayName}`);
+      } else {
          console.log('No results');
       }
    }
+
 
    const getCurrentLocation = () => {
       if (navigator.geolocation) {
