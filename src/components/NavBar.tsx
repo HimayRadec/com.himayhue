@@ -10,7 +10,7 @@ export default function NavBar() {
    const user = session.data?.user;
    console.log(session);
    return (
-      <header className="sticky top-0 bg-background px-3 shadow-sm">
+      <header className="sticky top-0 bg-background px-3 shadow-sm border-b">
          <nav className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3">
             <Link href="/" className="font-bold">
 
