@@ -6,12 +6,22 @@ import {
    AdvancedMarker,
    Pin,
 } from '@vis.gl/react-google-maps';
+import MapsSearchForm from '../bucketList/MapsSearchForm';
+import { Separator } from '@/components/ui/separator';
+
+
 
 export default function GoogleMap() {
+   const [mapSearchQuery, setMapSearchQuery] = useState<string>('');
+   const [currentLatLong, setCurrentLatLong] = useState<google.maps.LatLngLiteral>({ lat: 33.4228583, lng: -111.944015 });
+   const [pointsOfInterest, setPointsOfInterest] = useState<google.maps.LatLngLiteral[]>([]);
+   const [mapSearchResults, setMapSearchResults] = useState<google.maps.places.PlaceResult[]>([]);
+
    const googleMapsAPIKey: string = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string;
-   const currentLatLong: google.maps.LatLngLiteral = { lat: 33.4228583, lng: -111.944015 };
 
    type pointsOfInterest = { key: string; location: google.maps.LatLngLiteral };
+
+
    const [locations, setLocations] = useState<pointsOfInterest[]>([
       {
          key: 'myLocation',
@@ -19,18 +29,17 @@ export default function GoogleMap() {
       },
    ]);
 
-   async function findPlaces() {
+   async function findPlaces(searchQuery: string) {
       const { Place } = (await google.maps.importLibrary("places")) as google.maps.PlacesLibrary;
 
       const request = {
-         textQuery: 'Canes',
-         fields: ['addressComponents', 'displayName', 'location', 'businessStatus'],
-         includedType: 'restaurant',
+         textQuery: searchQuery,
+         fields: ['addressComponents', 'formattedAddress', 'displayName', 'location', 'businessStatus'],
          locationBias: currentLatLong,
-         isOpenNow: true,
+         // isOpenNow: true,
          language: 'en-US',
          maxResultCount: 3,
-         minRating: 3.2,
+         // minRating: 3.2,
          region: 'us',
          useStrictTypeFiltering: false,
       };
@@ -42,7 +51,7 @@ export default function GoogleMap() {
          console.log(places);
 
          const newLocations = places.map((place) => ({
-            key: place.displayName!,
+            key: `${place.displayName} ${place.formattedAddress}`,
             location: {
                lat: place.location!.lat(),
                lng: place.location!.lng(),
@@ -50,14 +59,16 @@ export default function GoogleMap() {
          }));
 
          setLocations((prevLocations) => [...prevLocations, ...newLocations]);
-      } else {
+      }
+      else {
          console.log('No results');
       }
    }
 
    useEffect(() => {
-      findPlaces();
-   }, []);
+      console.log('Searching for:', mapSearchQuery);
+      findPlaces(mapSearchQuery);
+   }, [mapSearchQuery]);
 
    const PointsOfInterestMarkers = (props: { pointsOfInterest: pointsOfInterest[] }) => {
       return (
@@ -81,19 +92,36 @@ export default function GoogleMap() {
    };
 
    return (
-      <div>
-         <APIProvider apiKey={googleMapsAPIKey} onLoad={() => console.log('Maps API has loaded.')}>
-            <Map
-               className="w-screen h-screen"
-               defaultCenter={currentLatLong}
-               defaultZoom={13}
-               gestureHandling="greedy"
-               mapId="DEMO_MAP_ID"
-               disableDefaultUI={true}
-            >
-               <PointsOfInterestMarkers pointsOfInterest={locations} />
-            </Map>
-         </APIProvider>
+      <div className='flex flex-row min-h-screen'>
+
+         {/* Google Map */}
+         <div className='w-3/4'>
+            <APIProvider apiKey={googleMapsAPIKey} onLoad={() => console.log('Maps API has loaded.')}>
+               <Map
+                  className="w-full h-full"
+                  defaultCenter={currentLatLong}
+                  defaultZoom={13}
+                  gestureHandling="greedy"
+                  mapId="DEMO_MAP_ID"
+                  disableDefaultUI={true}
+               >
+                  <PointsOfInterestMarkers pointsOfInterest={locations} />
+               </Map>
+            </APIProvider>
+         </div>
+
+         {/* Search Sidebar  */}
+         <div className='w-1/4 border'>
+            <MapsSearchForm setMapSearchQuery={setMapSearchQuery} />
+            <div>
+               <ul>
+                  {locations.map((location) => (
+                     <li key={location.key}>{location.key}</li>
+                  ))}
+               </ul>
+            </div>
+         </div>
+
       </div>
    );
 }
