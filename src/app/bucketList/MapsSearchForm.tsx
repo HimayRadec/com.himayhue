@@ -25,8 +25,17 @@ interface MapsSearchFormProps {
    setMapSearchQuery: React.Dispatch<React.SetStateAction<string>>;
 }
 
+
+/**
+ * A search form component for updating the map's search query.
+ *
+ * @param {(query: string) => void} param0.setMapSearchQuery - Function to update the map search query state in the parent component.
+ * 
+ * @returns {JSX.Element} The rendered search form component.
+ */
 export default function MapsSearchForm({ setMapSearchQuery }: MapsSearchFormProps) {
    const [inputText, setInputText] = useState('');
+
 
 
    // Validation and form state management

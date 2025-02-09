@@ -7,7 +7,7 @@ const config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   prefix: "",
   theme: {
     container: {
@@ -67,10 +67,16 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        pulseEffect: {
+          '0%': { transform: 'scale(1)', opacity: '0.5' },
+          '50%': { transform: 'scale(1.3)', opacity: '0.3' },
+          '100%': { transform: 'scale(1)', opacity: '0.5' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        pulse: 'pulseEffect 3s infinite',
       },
     },
   },
