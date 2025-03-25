@@ -9,11 +9,12 @@ export default function NavBar() {
    const session = useSession();
    const user = session.data?.user;
    console.log(session);
-   return (
-      <header className="sticky top-0 bg-background px-3 shadow-sm border-b">
-         <nav className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3">
-            <Link href="/" className="font-bold">
 
+   return (
+      <header className="sticky w-full top-0 bg-background px-3 shadow-sm border-b">
+         <nav className="mx-auto flex h-14 items-center justify-between gap-3">
+            <Link href="/" className="font-bold">
+               HOME
             </Link>
             <div className="flex items-center gap-3">
                {user && user.name}
