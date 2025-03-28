@@ -5,7 +5,7 @@ import { Loader } from "@googlemaps/js-api-loader";
 interface GoogleMapProps {
    searchQuery: string;
    setSearchResultsDetails: Dispatch<SetStateAction<string>>;
-   setPlaces: Dispatch<SetStateAction<google.maps.places.PlaceResult[]>>;
+   setPlaces: Dispatch<SetStateAction<google.maps.places.Place[]>>;
 
 }
 
@@ -79,9 +79,9 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
       // Here is where you pass the parameters for the search request
       const request = {
          textQuery: searchQuery,
-         fields: ['addressComponents', 'displayName', 'location', 'businessStatus'],
+         fields: ['formattedAddress', 'displayName', 'location', 'businessStatus'],
          language: 'en-US',
-         maxResultCount: 8,
+         maxResultCount: 5,
          region: 'us',
          useStrictTypeFiltering: false,
       };
@@ -100,7 +100,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
          console.log(`[GoogleMap.tsx]: Displaying results for ${searchQuery}`);
 
          // Collect all the places into a new array
-         const newPlaces: google.maps.places.PlaceResult[] = places.map((place) => {
+         const newPlaces: google.maps.places.Place[] = places.map((place) => {
             // Ensure place has a location property
             if (place.location) {
                bounds.extend(place.location as google.maps.LatLng);
@@ -109,7 +109,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
             console.log(`[GoogleMap.tsx]:`, JSON.stringify(place, null, 2));
 
             // Return the place directly or transform it if necessary
-            return place as google.maps.places.PlaceResult;
+            return place;
          });
 
          // Update the places state once, after the loop
@@ -118,10 +118,9 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
          map.fitBounds(bounds);
          map.setZoom(15);
 
-         setSearchResultsDetails(`Found ${places.length} results for ${places[0].displayName}`);
-      } else {
-         console.log('No results');
+         //  setSearchResultsDetails(JSON.stringify(places, null, 2));
       }
+      else console.log('No results for:', searchQuery);
    }
 
 
@@ -139,9 +138,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
             }
          );
       }
-      else {
-         console.error("Geolocation is not supported by this browser.");
-      }
+      else console.error("Geolocation is not supported by this browser.");
    };
 
    function updateLocationCircle(newCenter: google.maps.LatLngLiteral) {
