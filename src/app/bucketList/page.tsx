@@ -26,9 +26,6 @@ export default function BucketList() {
             {places.length === 0 && <li className='text-gray-400'>No results found</li>}
             {places.length > 0 && (
               <>
-                <li className='text-gray-400'>
-                  <pre>{JSON.stringify(places, null, 2)}</pre>
-                </li>
                 {places.map((place, index) => (
                   <li key={index} className='mb-2'>
                     <strong>{place.displayName}</strong>

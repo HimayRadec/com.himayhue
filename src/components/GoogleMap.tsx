@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
+import { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
 import { Loader } from "@googlemaps/js-api-loader";
 
 interface GoogleMapProps {
@@ -22,6 +22,8 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
+   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+
 
    const [mapOptions, setMapOptions] = useState<google.maps.MapOptions>({
       center: { lat: 37.7749, lng: -122.4194 },
@@ -39,14 +41,16 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
 
    // Create Map
    useEffect(() => {
-      const loader = new Loader({
-         apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-         version: "weekly",
-      });
+
 
       const initMap = async () => {
          // Checks for an element with the ref mapRef
          if (!mapElement.current) return;
+
+         const loader = new Loader({
+            apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+            version: "weekly",
+         });
 
          const { Map } = await loader.importLibrary("maps");
 
@@ -55,7 +59,6 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
 
          // Sets the center of the map to the current location and adds a marker
          if (currentLocation) {
-
             updateLocationCircle(currentLocation);
             updateMapCenter(currentLocation);
             mapInstanceRef.current.setCenter(currentLocation);
@@ -74,7 +77,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
 
    async function searchOnGoogleMap(map: google.maps.Map) {
       const { Place } = await google.maps.importLibrary("places") as google.maps.PlacesLibrary;
-      const { AdvancedMarkerElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
       // Here is where you pass the parameters for the search request
       const request = {
@@ -86,39 +89,44 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
          useStrictTypeFiltering: false,
       };
 
-      console.log('Searching for places: ', searchQuery);
-
-      // Stores the results of the search in the places variable
       const { places } = await Place.searchByText(request);
 
       if (places.length) {
-         console.log(`Found ${places.length} places`);
-
          const { LatLngBounds } = await google.maps.importLibrary("core") as google.maps.CoreLibrary;
          const bounds = new LatLngBounds();
 
-         console.log(`[GoogleMap.tsx]: Displaying results for ${searchQuery}`);
+         // Clear previous markers
+         markersRef.current.forEach(marker => marker.map = null);  // Remove each marker from the map
+         markersRef.current = []; // Clear the markers arrayy
+
 
          // Collect all the places into a new array
          const newPlaces: google.maps.places.Place[] = places.map((place) => {
-            // Ensure place has a location property
-            if (place.location) {
-               bounds.extend(place.location as google.maps.LatLng);
-            }
+            if (place.location) bounds.extend(place.location as google.maps.LatLng);
 
-            console.log(`[GoogleMap.tsx]:`, JSON.stringify(place, null, 2));
+            // Create pins
+            const searchResultPin = new PinElement({
+               scale: 1.0,
+               background: '#ffc107',  // Vibrant yellow for optimism and attention
+               borderColor: '#ffab00',  // Slightly darker yellow border
+               glyphColor: '#fff',  // Black icon for better contrast
+            });
 
-            // Return the place directly or transform it if necessary
+            // Add marker to map
+            const marker = new AdvancedMarkerElement({
+               position: place.location || { lat: 0, lng: 0 },
+               map: map,
+               title: place.displayName || "Result",
+               content: searchResultPin.element,
+            });
+            markersRef.current.push(marker);
+
             return place;
          });
 
-         // Update the places state once, after the loop
          setPlaces(newPlaces);
-
          map.fitBounds(bounds);
-         map.setZoom(15);
-
-         //  setSearchResultsDetails(JSON.stringify(places, null, 2));
+         if (map.getZoom()! > 18) map.setZoom(18);
       }
       else console.log('No results for:', searchQuery);
    }
@@ -170,6 +178,6 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
 
 
    return (
-      <div ref={mapElement} className="google-map w-full"></div>
+      <div ref={mapElement} className="w-full" />
    )
 }
