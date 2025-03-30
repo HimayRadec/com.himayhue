@@ -84,7 +84,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
          textQuery: searchQuery,
          fields: ['formattedAddress', 'displayName', 'location', 'businessStatus'],
          language: 'en-US',
-         maxResultCount: 5,
+         maxResultCount: 15,
          region: 'us',
          useStrictTypeFiltering: false,
       };

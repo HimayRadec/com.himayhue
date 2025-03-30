@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { BiSearch } from "react-icons/bi";
 
 
 interface MapsSearchFormProps {
@@ -70,22 +71,25 @@ export default function MapsSearchForm({ setMapSearchQuery }: MapsSearchFormProp
                render={({ field }) => (
                   <FormItem>
                      <FormControl>
-                        <Input
-                           placeholder="Search Google Maps"
-                           {...field}
-                           // Wrap field.onChange to handle additional state updates
-                           onChange={(event) => {
-                              field.onChange(event);  // Call React Hook Form's onChange
-                              setInputText(event.target.value);  // Update custom state
-                           }}
-                        />
+                        <div className="relative">
+                           <Input
+                              placeholder="Search Google Maps"
+                              {...field}
+                              onChange={(event) => {
+                                 field.onChange(event);  // Call React Hook Form's onChange
+                                 setInputText(event.target.value);  // Update custom state
+                              }}
+                              className="w-full p-3 pl-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           />
+                           <BiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                        </div>
                      </FormControl>
                      <FormMessage />
                   </FormItem>
                )}
             />
-            <Button type="submit">Search</Button>
          </form>
       </Form>
+
    )
 }
