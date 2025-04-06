@@ -82,7 +82,7 @@ export default function GoogleMap({ searchQuery, setSearchResultsDetails, setPla
       // Here is where you pass the parameters for the search request
       const request = {
          textQuery: searchQuery,
-         fields: ['formattedAddress', 'displayName', 'location', 'businessStatus'],
+         fields: ['formattedAddress', 'displayName', 'location', 'websiteURI', 'primaryTypeDisplayName',],
          language: 'en-US',
          maxResultCount: 15,
          region: 'us',

@@ -1,12 +1,20 @@
-export type BucketListSpot = {
+export type BucketListPlace = {
    id: string;
-   name: string;
+   dateAdded: string;
+   dateVisited?: string;
+   displayName: string;
    formattedAddress: string;
+   googleMapsURI?: string;
    location: {
       lat: number;
       lng: number;
    };
-   visited: boolean;
+   websiteURI?: string;
+};
+
+export type BucketList = {
+   userId: string;
+   places: BucketListPlace[];
 };
 
 export enum PinColor {
