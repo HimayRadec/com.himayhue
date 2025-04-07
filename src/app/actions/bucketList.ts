@@ -1,6 +1,6 @@
 'use server';
 
-import { BucketListPlace } from "@/types/bucketList";
+import { BucketListPlace } from "@/types/bucketListTypes";
 import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
 

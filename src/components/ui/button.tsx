@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { PinColor } from "@/types/bucketListTypes"
 
 import { cn } from "@/lib/utils"
 
@@ -12,12 +13,20 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        unvisitedPlace:
+          "bg-[#808080] text-secondary-foreground hover:bg-secondary/80",
+        visitedPlace:
+          "bg-[#00A000] text-accent-foreground hover:bg-accent/80",
+        // TODO: Make the results place color connected to the results pins color and make them synced to the primary color
+        resultPlace:
+          "bg-primary text-accent-foreground hover:bg-accent/80",
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        blank: "",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -35,7 +44,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 

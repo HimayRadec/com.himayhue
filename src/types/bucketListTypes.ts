@@ -18,8 +18,8 @@ export type BucketList = {
 };
 
 export enum PinColor {
-   Visited = '#00A000', // Green for visited spots
-   Unvisited = '#808080', // Grey for unvisited spots
-   Hovered = '#000000', // White border for hovered spots
-   Location = '#4285F4' // Blue for current location
+   Visited = '#00A000',   // ✅ Green for visited spots
+   Unvisited = '#808080', // ❌ Gray for unvisited spots
+   Result = '#DC2626',    // 🔍 Red for search results
+   Hovered = '#000000',   // ⚪ Optional: Black border for hovered spots
 }

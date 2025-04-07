@@ -7,7 +7,7 @@ import {
    Pin,
 } from '@vis.gl/react-google-maps';
 import MapsSearchForm from '../bucketList/MapsSearchForm';
-import { BucketListSpot, PinColor } from '@/types/bucketList';
+import { BucketListSpot, PinColor } from '@/types/bucketListTypes';
 
 
 
