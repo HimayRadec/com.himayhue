@@ -1,10 +1,11 @@
-'use client'
+// 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { Loader } from "@googlemaps/js-api-loader";
 
 // Types
 import { PinColor } from '@/types/bucketListTypes';
 import { BucketListPlace } from '@/types/bucketListTypes';
+import { map } from 'zod';
 
 interface GoogleMapProps {
    searchResultPlaces: google.maps.places.Place[];
@@ -18,10 +19,13 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    const searchResultPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
    const bucketListPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
 
-   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
+
+   const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 }; // Center of USA
+   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral>(DEFAULT_CENTER);
+
    const [mapOptions, setMapOptions] = useState<google.maps.MapOptions>({
-      center: { lat: 37.7749, lng: -122.4194 },
+      center: currentLocation,
       mapTypeId: "terrain",
       zoom: 15,
       mapId: "a1079c9cea2794a7",
@@ -35,31 +39,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
       };
    }, []);
 
-
-   // Asks for the user's location and initializes the map
    useEffect(() => {
-      getCurrentLocation();
-      const initMap = async () => {
-         if (!mapElement.current) return;
-
-         const { Map } = await loadGoogleMap();
-         await createMapInstance(Map);
-      };
-
-      initMap();
-
+      if (mapElement.current) initMap();
+      getCurrentLocation(); // will trigger `currentLocation` to be set
    }, []);
-
-   // center map to current location
-   useEffect(() => {
-      if (currentLocation && mapInstanceRef.current) centerMapToCurrentLocation();
-   }, [currentLocation]);
 
 
    // Update Search Result Places Pins when places change
    useEffect(() => {
       if (mapInstanceRef.current && searchResultPlaces.length) displaySearchResultsPlaces(searchResultPlaces);
    }, [searchResultPlaces]);
+
 
    // Update Bucket List Places Pins when places change
    useEffect(() => {
@@ -71,38 +61,62 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
       if (navigator.geolocation) {
          navigator.geolocation.getCurrentPosition(
             (position) => {
-               setCurrentLocation({
+               const coords = {
                   lat: position.coords.latitude,
                   lng: position.coords.longitude,
-               });
+               };
+
+               setCurrentLocation(coords);
+               console.log("Current location:", coords.lat, coords.lng);
+
+               if (mapInstanceRef.current) {
+                  console.log("Map instance exists, setting center and zoom.");
+                  mapInstanceRef.current.setCenter(coords);
+                  mapInstanceRef.current.setZoom(15);
+
+                  const circle = new google.maps.Circle({
+                     strokeColor: "#4285F4",
+                     strokeOpacity: 0.8,
+                     strokeWeight: 2,
+                     fillColor: "#4285F4",
+                     fillOpacity: 0.35,
+                     map: mapInstanceRef.current,
+                     center: coords,
+                     radius: 100,
+                  });
+
+                  setLocationCircle(circle);
+               }
             },
             (error) => {
                console.error("Error getting location:", error);
             }
          );
+      } else {
+         console.error("Geolocation is not supported by this browser.");
       }
-      else console.error("Geolocation is not supported by this browser.");
    };
 
-   const loadGoogleMap = async () => {
+
+   const initMap = async () => {
+      if (!mapElement.current) return;
+
       const loader = new Loader({
          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
          version: "weekly",
       });
-      return loader.importLibrary("maps");
+
+
+      const google = await loader.load()
+
+      const map = new google.maps.Map(mapElement.current, {
+         ...mapOptions,
+         center: currentLocation || mapOptions.center,
+      })
+
+      mapInstanceRef.current = map
+
    };
-
-   const createMapInstance = async (Map: any) => {
-      if (!mapElement.current || mapInstanceRef.current) return;
-
-      mapInstanceRef.current = new Map(mapElement.current as HTMLDivElement, mapOptions);
-   };
-
-   const centerMapToCurrentLocation = () => {
-      if (!mapInstanceRef.current || !currentLocation) return;
-      mapInstanceRef.current.setCenter(currentLocation);
-   };
-
 
    async function displaySearchResultsPlaces(places: google.maps.places.Place[]) {
       if (!places.length) return;
