@@ -1,5 +1,5 @@
 // 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, use } from 'react'
 import { Loader } from "@googlemaps/js-api-loader";
 
 // Types
@@ -20,16 +20,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    const bucketListPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
 
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
+   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
+   const [mapIsReady, setMapIsReady] = useState(false);
+
 
    const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 }; // Center of USA
-   const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral>(DEFAULT_CENTER);
-
-   const [mapOptions, setMapOptions] = useState<google.maps.MapOptions>({
-      center: currentLocation,
+   const MAP_OPTIONS: google.maps.MapOptions = {
+      center: DEFAULT_CENTER,
       mapTypeId: "terrain",
       zoom: 15,
       mapId: "a1079c9cea2794a7",
-   });
+   };
 
    // Cleanup markers on unmount
    useEffect(() => {
@@ -40,9 +41,18 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }, []);
 
    useEffect(() => {
-      if (mapElement.current) initMap();
-      getCurrentLocation(); // will trigger `currentLocation` to be set
+      getCurrentLocation();
+      initMap();
    }, []);
+
+   useEffect(() => {
+      if (mapIsReady && currentLocation && mapInstanceRef.current) {
+         console.log("Map and location ready, centering now.");
+         mapInstanceRef.current.setCenter(currentLocation);
+      }
+   }, [mapIsReady, currentLocation]);
+
+
 
 
    // Update Search Result Places Pins when places change
@@ -57,7 +67,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }, [bucketListPlaces]);
 
 
-   const getCurrentLocation = () => {
+   async function getCurrentLocation() {
       if (navigator.geolocation) {
          navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -67,38 +77,19 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
                };
 
                setCurrentLocation(coords);
-               console.log("Current location:", coords.lat, coords.lng);
-
-               if (mapInstanceRef.current) {
-                  console.log("Map instance exists, setting center and zoom.");
-                  mapInstanceRef.current.setCenter(coords);
-                  mapInstanceRef.current.setZoom(15);
-
-                  const circle = new google.maps.Circle({
-                     strokeColor: "#4285F4",
-                     strokeOpacity: 0.8,
-                     strokeWeight: 2,
-                     fillColor: "#4285F4",
-                     fillOpacity: 0.35,
-                     map: mapInstanceRef.current,
-                     center: coords,
-                     radius: 100,
-                  });
-
-                  setLocationCircle(circle);
-               }
             },
             (error) => {
                console.error("Error getting location:", error);
             }
          );
-      } else {
+      }
+      else {
          console.error("Geolocation is not supported by this browser.");
       }
    };
 
 
-   const initMap = async () => {
+   async function initMap(): Promise<void> {
       if (!mapElement.current) return;
 
       const loader = new Loader({
@@ -106,16 +97,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
          version: "weekly",
       });
 
+      loader
+         .importLibrary('maps')
+         .then(({ Map }) => {
+            mapInstanceRef.current = new google.maps.Map(mapElement.current!, MAP_OPTIONS);
+            setMapIsReady(true);
 
-      const google = await loader.load()
-
-      const map = new google.maps.Map(mapElement.current, {
-         ...mapOptions,
-         center: currentLocation || mapOptions.center,
-      })
-
-      mapInstanceRef.current = map
-
+            if (currentLocation) mapInstanceRef.current.setCenter(currentLocation);
+         })
+         .catch((e) => {
+            console.error("Error loading Google Maps:", e);
+         });
    };
 
    async function displaySearchResultsPlaces(places: google.maps.places.Place[]) {
@@ -188,6 +180,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }
 
    return (
-      <div ref={mapElement} className="w-full" />
+      <div ref={mapElement} className="w-full">
+      </div>
    )
 }

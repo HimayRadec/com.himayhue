@@ -1,6 +1,7 @@
 'use client'
 // React
 import { useState, useEffect } from 'react'
+import { Suspense } from 'react'
 
 // Next.js & Routing
 import Link from 'next/link'
@@ -69,7 +70,9 @@ export default function BucketList() {
   return (
     <div className="flex flex-grow border-t overflow-hidden">
       {/* Map Section */}
-      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} />
+      <Suspense fallback={<p>Loading map...</p>}>
+        <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} />
+      </Suspense>
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
