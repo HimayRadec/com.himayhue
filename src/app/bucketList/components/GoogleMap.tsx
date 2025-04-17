@@ -9,9 +9,10 @@ import { BucketListPlace } from '@/types/bucketListTypes';
 interface GoogleMapProps {
    searchResultPlaces: google.maps.places.Place[];
    bucketListPlaces: BucketListPlace[];
+   hoveredPlace: String | null;
 }
 
-export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: GoogleMapProps) {
+export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hoveredPlace }: GoogleMapProps) {
    const mapElement = useRef<HTMLDivElement>(null); // Reference to the map div element
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
 
@@ -60,8 +61,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
 
    // Update Bucket List Places Pins when places change
    useEffect(() => {
-      if (mapInstanceRef.current) displayBucketListPlaces(bucketListPlaces);
+      if (!mapInstanceRef.current) return;
+      displayBucketListPlaces(bucketListPlaces);
    }, [bucketListPlaces]);
+
+   // Update Hovered Place Pin
+   useEffect(() => {
+      if (!mapInstanceRef.current) return;
+
+      if (hoveredPlace) {
+      }
+   }, [hoveredPlace]);
 
 
    async function getCurrentLocation(): Promise<google.maps.LatLngLiteral | null> {
@@ -153,6 +163,9 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
 
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
+      const infoWindow = new google.maps.InfoWindow();
+      let lastOpenedMarker: google.maps.marker.AdvancedMarkerElement | null = null;
+
 
       // Create a new marker for each place
       places.forEach(place => {
@@ -170,7 +183,30 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
             map: mapInstanceRef.current,
             title: place.displayName,
             content: bucketListPin.element,
+            gmpClickable: true,
          });
+
+
+         marker.addListener('click', () => {
+            const isSameMarker = lastOpenedMarker === marker;
+
+            if (isSameMarker) {
+               infoWindow.close();
+               lastOpenedMarker = null;
+            }
+            else {
+               const header = document.createElement("div");
+               header.innerText = marker.title;
+               header.style.color = "black"; // or any other styling
+               header.style.fontWeight = "bold";
+               header.style.fontSize = "14px";
+
+               infoWindow.setHeaderContent(header);
+               infoWindow.open(marker.map, marker);
+               lastOpenedMarker = marker;
+            }
+         });
+
          bucketListPlacesMarkers.current.push(marker);
       });
 

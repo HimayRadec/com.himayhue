@@ -30,7 +30,7 @@ export default function BucketList() {
   const [searchResultsDetails, setSearchResultsDetails] = useState<string>('');
   const [places, setPlaces] = useState<google.maps.places.Place[]>([]);
   const [bucketList, setBucketList] = useState<BucketListPlace[]>([]);
-  const [hoveredPlace, setHoveredPlace] = useState<number | null>(null);
+  const [hoveredPlace, setHoveredPlace] = useState<String | null>(null);
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -68,14 +68,14 @@ export default function BucketList() {
   }, [userId]);
 
   useEffect(() => {
-    console.log('Updated places:', places);
-  }, [places]);
+    console.log('Hovered place:', hoveredPlace);
+  }, [hoveredPlace]);
 
 
   return (
     <div className="flex flex-grow border-t overflow-hidden">
       {/* Map Section */}
-      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} />
+      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} hoveredPlace={hoveredPlace} />
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
@@ -95,7 +95,7 @@ export default function BucketList() {
                   <p className="text-gray-400 text-center">Your bucket list is empty.</p>
                 ) : (
                   bucketList.map((place, index) => (
-                    <BucketPlaceCard key={index} place={place} />
+                    <BucketPlaceCard key={index} place={place} setHoveredPlace={setHoveredPlace} />
                   ))
                 )}
               </ScrollArea>

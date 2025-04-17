@@ -17,11 +17,16 @@ import { BucketListPlace } from "@/types/bucketListTypes"
 
 interface Props {
    place: BucketListPlace;
+   setHoveredPlace: React.Dispatch<React.SetStateAction<String | null>>;
 }
 
-export function BucketPlaceCard({ place }: Props) {
+export function BucketPlaceCard({ place, setHoveredPlace }: Props) {
    return (
-      <Card>
+      <Card
+         className="hover:bg-neutral-700 transition-all duration-200 ease-in-out"
+         onMouseEnter={() => setHoveredPlace(place.id)}
+         onMouseLeave={() => setHoveredPlace(null)}
+      >
          <CardHeader>
             <CardTitle>{place.displayName}</CardTitle>
          </CardHeader>
