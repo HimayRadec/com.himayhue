@@ -70,9 +70,7 @@ export default function BucketList() {
   return (
     <div className="flex flex-grow border-t overflow-hidden">
       {/* Map Section */}
-      <Suspense fallback={<p>Loading map...</p>}>
-        <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} />
-      </Suspense>
+      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} />
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">

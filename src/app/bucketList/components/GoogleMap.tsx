@@ -1,11 +1,10 @@
 // 'use client'
-import { useState, useEffect, useRef, use } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Loader } from "@googlemaps/js-api-loader";
 
 // Types
 import { PinColor } from '@/types/bucketListTypes';
 import { BucketListPlace } from '@/types/bucketListTypes';
-import { map } from 'zod';
 
 interface GoogleMapProps {
    searchResultPlaces: google.maps.places.Place[];
@@ -21,8 +20,6 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
 
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
-   const [mapIsReady, setMapIsReady] = useState(false);
-
 
    const DEFAULT_CENTER = { lat: 39.8283, lng: -98.5795 }; // Center of USA
    const MAP_OPTIONS: google.maps.MapOptions = {
@@ -41,18 +38,18 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }, []);
 
    useEffect(() => {
-      getCurrentLocation();
-      initMap();
+      (async () => {
+         await initMap();
+
+         try {
+            const coords = await getCurrentLocation();
+            if (coords) mapInstanceRef.current?.setCenter(coords);
+         }
+         catch {
+            console.warn("User denied location or something went wrong.");
+         }
+      })();
    }, []);
-
-   useEffect(() => {
-      if (mapIsReady && currentLocation && mapInstanceRef.current) {
-         console.log("Map and location ready, centering now.");
-         mapInstanceRef.current.setCenter(currentLocation);
-      }
-   }, [mapIsReady, currentLocation]);
-
-
 
 
    // Update Search Result Places Pins when places change
@@ -67,26 +64,29 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }, [bucketListPlaces]);
 
 
-   async function getCurrentLocation() {
-      if (navigator.geolocation) {
+   async function getCurrentLocation(): Promise<google.maps.LatLngLiteral | null> {
+      if (!navigator.geolocation) {
+         console.error("Geolocation is not supported by this browser.");
+         return null;
+      }
+
+      return new Promise((resolve, reject) => {
          navigator.geolocation.getCurrentPosition(
             (position) => {
                const coords = {
                   lat: position.coords.latitude,
                   lng: position.coords.longitude,
                };
-
                setCurrentLocation(coords);
+               resolve(coords); // ✅ return location directly
             },
             (error) => {
                console.error("Error getting location:", error);
+               reject(null);
             }
          );
-      }
-      else {
-         console.error("Geolocation is not supported by this browser.");
-      }
-   };
+      });
+   }
 
 
    async function initMap(): Promise<void> {
@@ -94,21 +94,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
 
       const loader = new Loader({
          apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-         version: "weekly",
+         version: 'weekly',
       });
 
-      loader
-         .importLibrary('maps')
-         .then(({ Map }) => {
-            mapInstanceRef.current = new google.maps.Map(mapElement.current!, MAP_OPTIONS);
-            setMapIsReady(true);
-
-            if (currentLocation) mapInstanceRef.current.setCenter(currentLocation);
-         })
-         .catch((e) => {
-            console.error("Error loading Google Maps:", e);
-         });
-   };
+      try {
+         const { Map } = await loader.importLibrary('maps');
+         mapInstanceRef.current = new Map(mapElement.current, MAP_OPTIONS);
+      }
+      catch (e) {
+         console.error('Error loading Google Maps:', e);
+      }
+   }
 
    async function displaySearchResultsPlaces(places: google.maps.places.Place[]) {
       if (!places.length) return;
