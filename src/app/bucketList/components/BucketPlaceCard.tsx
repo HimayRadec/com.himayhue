@@ -12,20 +12,26 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
+import { cn } from "@/lib/utils";
+
 // Types
 import { BucketListPlace } from "@/types/bucketListTypes"
 
 interface Props {
    place: BucketListPlace;
+   hoveredPlace: String | null;
    setHoveredPlace: React.Dispatch<React.SetStateAction<String | null>>;
 }
 
-export function BucketPlaceCard({ place, setHoveredPlace }: Props) {
+export function BucketPlaceCard({ place, setHoveredPlace, hoveredPlace }: Props) {
    return (
       <Card
-         className="hover:bg-neutral-700 transition-all duration-200 ease-in-out"
          onMouseEnter={() => setHoveredPlace(place.id)}
          onMouseLeave={() => setHoveredPlace(null)}
+         className={cn(
+            "transition-all duration-200 ease-in-out",
+            hoveredPlace === place.id ? "bg-neutral-700" : "hover:bg-neutral-700"
+         )}
       >
          <CardHeader>
             <CardTitle>{place.displayName}</CardTitle>

@@ -79,23 +79,23 @@ export default function BucketList() {
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
-        <div className="w-full p-4 border-b border-neutral-800 flex flex-col justify-between items-center">
+        <div className="w-full border-b border-neutral-800 flex flex-col justify-between items-center">
 
           <PlacesSearchbar UpdatePlacesResults={setPlaces} />
 
-          <Tabs defaultValue='bucket-list' className='w-full rounded-none'>
+          <Tabs defaultValue='bucket-list' className='w-full rounded-none border'>
             <TabsList className='w-full'>
               <TabsTrigger value='bucket-list'>Bucket List</TabsTrigger>
               <TabsTrigger value='search'>Search</TabsTrigger>
             </TabsList>
 
             <TabsContent value='bucket-list'>
-              <ScrollArea className="w-full p-4 flex flex-col space-y-4 max-h-[calc(100vh-8rem)] ">
+              <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {bucketList.length === 0 ? (
                   <p className="text-gray-400 text-center">Your bucket list is empty.</p>
                 ) : (
                   bucketList.map((place, index) => (
-                    <BucketPlaceCard key={index} place={place} setHoveredPlace={setHoveredPlace} />
+                    <BucketPlaceCard key={index} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
                   ))
                 )}
               </ScrollArea>

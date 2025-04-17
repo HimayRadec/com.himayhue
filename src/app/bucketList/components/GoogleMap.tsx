@@ -232,6 +232,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
             if (isSameMarker) {
                infoWindow.close();
                lastOpenedMarker = null;
+               setHoveredPlace(null);
             }
             else {
                /*
@@ -249,6 +250,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
                infoWindow.setHeaderContent(header);
                infoWindow.open(marker.map, marker);
                lastOpenedMarker = marker;
+               setHoveredPlace(place.id);
             }
          });
 
