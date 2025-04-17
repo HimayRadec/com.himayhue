@@ -54,13 +54,13 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
 
    // Update Search Result Places Pins when places change
    useEffect(() => {
-      if (mapInstanceRef.current && searchResultPlaces.length) displaySearchResultsPlaces(searchResultPlaces);
+      if (mapInstanceRef.current) displaySearchResultsPlaces(searchResultPlaces);
    }, [searchResultPlaces]);
 
 
    // Update Bucket List Places Pins when places change
    useEffect(() => {
-      if (mapInstanceRef.current && bucketListPlaces.length) displayBucketListPlaces(bucketListPlaces);
+      if (mapInstanceRef.current) displayBucketListPlaces(bucketListPlaces);
    }, [bucketListPlaces]);
 
 
@@ -107,14 +107,14 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }
 
    async function displaySearchResultsPlaces(places: google.maps.places.Place[]) {
+      // Clear previous markers
+      searchResultPlacesMarkers.current.forEach(marker => marker.map = null);
+      searchResultPlacesMarkers.current = [];
+
       if (!places.length) return;
 
       const bounds = new google.maps.LatLngBounds();
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-
-      // Clear previous markers
-      searchResultPlacesMarkers.current.forEach(marker => marker.map = null);
-      searchResultPlacesMarkers.current = [];
 
       // Create a new marker for each place
       places.forEach(place => {
@@ -145,13 +145,14 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces }: Goog
    }
 
    async function displayBucketListPlaces(places: BucketListPlace[]) {
+      // Clear previous markers
+      bucketListPlacesMarkers.current.forEach(marker => marker.map = null);
+      bucketListPlacesMarkers.current = [];
+
       if (!places.length) return;
 
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
-      // Clear previous markers
-      bucketListPlacesMarkers.current.forEach(marker => marker.map = null);
-      bucketListPlacesMarkers.current = [];
 
       // Create a new marker for each place
       places.forEach(place => {

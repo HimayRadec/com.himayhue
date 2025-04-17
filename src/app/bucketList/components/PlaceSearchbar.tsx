@@ -64,7 +64,7 @@ export default function PlacesSearchbar({ UpdatePlacesResults }: PlacesSearchbar
 
    return (
       <Form {...form}>
-         <form onSubmit={form.handleSubmit(onSubmit)} className="border border-grey-300 rounded-xl w-full px-2 py-1">
+         <form onSubmit={form.handleSubmit(onSubmit)} className="border border-grey-300 w-full px-2 py-1">
             <div className="flex items-center w-full">
                <FormField
                   control={form.control}
@@ -90,8 +90,10 @@ export default function PlacesSearchbar({ UpdatePlacesResults }: PlacesSearchbar
                <Button
                   type="button"
                   variant="blank"
-                  onClick={() => form.setValue("searchInput", "")}
-               >
+                  onClick={() => {
+                     form.setValue("searchInput", "");
+                     UpdatePlacesResults([]);
+                  }}               >
                   <MdOutlineClear />
                </Button>
             </div>

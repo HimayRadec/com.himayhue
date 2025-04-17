@@ -14,8 +14,8 @@ import PlacesSearchbar from './components/PlaceSearchbar'
 import { BucketPlaceCard } from './components/BucketPlaceCard'
 
 // UI
-import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Actions
 import { addPlaceToBucketList, getBucketList } from '../actions/bucketList'
@@ -30,6 +30,7 @@ export default function BucketList() {
   const [searchResultsDetails, setSearchResultsDetails] = useState<string>('');
   const [places, setPlaces] = useState<google.maps.places.Place[]>([]);
   const [bucketList, setBucketList] = useState<BucketListPlace[]>([]);
+  const [hoveredPlace, setHoveredPlace] = useState<number | null>(null);
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -66,6 +67,10 @@ export default function BucketList() {
     fetchBucketList();
   }, [userId]);
 
+  useEffect(() => {
+    console.log('Updated places:', places);
+  }, [places]);
+
 
   return (
     <div className="flex flex-grow border-t overflow-hidden">
@@ -75,32 +80,41 @@ export default function BucketList() {
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
         <div className="w-full p-4 border-b border-neutral-800 flex flex-col justify-between items-center">
-          <PlacesSearchbar UpdatePlacesResults={setPlaces} />
-          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'search' ? 'myList' : 'search')}>
-            {viewMode === 'search' ? 'Search' : 'Bucket List'}
-          </Button>
-        </div>
 
-        {/* Search Results */}
-        <ScrollArea className="w-full p-4 flex flex-col space-y-4 max-h-[calc(100vh-8rem)] ">
-          {viewMode === 'search' ? (
-            places.length === 0 ? (
-              <p className="text-gray-400 text-center">No results found</p>
-            ) : (
-              places.map((place, index) => (
-                <PlaceResultCard key={index} place={place} />
-              ))
-            )
-          ) : (
-            bucketList.length === 0 ? (
-              <p className="text-gray-400 text-center">Your bucket list is empty.</p>
-            ) : (
-              bucketList.map((place, index) => (
-                <BucketPlaceCard key={index} place={place} />
-              ))
-            )
-          )}
-        </ScrollArea>
+          <PlacesSearchbar UpdatePlacesResults={setPlaces} />
+
+          <Tabs defaultValue='bucket-list' className='w-full rounded-none'>
+            <TabsList className='w-full'>
+              <TabsTrigger value='bucket-list'>Bucket List</TabsTrigger>
+              <TabsTrigger value='search'>Search</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='bucket-list'>
+              <ScrollArea className="w-full p-4 flex flex-col space-y-4 max-h-[calc(100vh-8rem)] ">
+                {bucketList.length === 0 ? (
+                  <p className="text-gray-400 text-center">Your bucket list is empty.</p>
+                ) : (
+                  bucketList.map((place, index) => (
+                    <BucketPlaceCard key={index} place={place} />
+                  ))
+                )}
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value='search'>
+              <ScrollArea className="w-full p-4 flex flex-col space-y-4 max-h-[calc(100vh-8rem)] ">
+                {places.length === 0 ? (
+                  <p className="text-gray-400 text-center">No results found</p>
+                ) : (
+                  places.map((place, index) => (
+                    <PlaceResultCard key={index} place={place} />
+                  ))
+                )}
+              </ScrollArea>
+            </TabsContent>
+
+          </Tabs>
+        </div>
       </div>
     </div>
   );
