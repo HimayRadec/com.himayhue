@@ -75,7 +75,7 @@ export default function BucketList() {
   return (
     <div className="flex flex-grow border-t overflow-hidden">
       {/* Map Section */}
-      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} hoveredPlace={hoveredPlace} />
+      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">

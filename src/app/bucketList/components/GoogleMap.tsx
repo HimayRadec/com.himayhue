@@ -10,14 +10,22 @@ interface GoogleMapProps {
    searchResultPlaces: google.maps.places.Place[];
    bucketListPlaces: BucketListPlace[];
    hoveredPlace: String | null;
+   setHoveredPlace: React.Dispatch<React.SetStateAction<String | null>>;
 }
 
-export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hoveredPlace }: GoogleMapProps) {
+interface MarkerWithPlaceId extends google.maps.marker.AdvancedMarkerElement {
+   placeId?: string | number;
+}
+
+
+export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hoveredPlace, setHoveredPlace }: GoogleMapProps) {
    const mapElement = useRef<HTMLDivElement>(null); // Reference to the map div element
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
 
+   const [lastHoveredPlace, setLastHoveredPlace] = useState<String | null>(null);
+
    const searchResultPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
-   const bucketListPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+   const bucketListPlacesMarkers = useRef<MarkerWithPlaceId[]>([]);
 
    const [locationCircle, setLocationCircle] = useState<google.maps.Circle | null>(null);
    const [currentLocation, setCurrentLocation] = useState<google.maps.LatLngLiteral | null>(null);
@@ -69,8 +77,36 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
    useEffect(() => {
       if (!mapInstanceRef.current) return;
 
-      if (hoveredPlace) {
+      // Reset previous hover pin
+      if (lastHoveredPlace && lastHoveredPlace !== hoveredPlace) {
+         const prevMarker = bucketListPlacesMarkers.current.find(
+            (marker) => marker.placeId === lastHoveredPlace
+         );
+         if (prevMarker) {
+            prevMarker.content = new google.maps.marker.PinElement({
+               scale: 1.0,
+               background: PinColor.Unvisited,
+               borderColor: PinColor.Unvisited,
+               glyphColor: '#fff',
+            }).element;
+         }
       }
+
+      // Highlight new hovered marker
+      if (hoveredPlace) {
+         const marker = bucketListPlacesMarkers.current.find(marker => marker.placeId === hoveredPlace);
+         if (marker) {
+            marker.content = new google.maps.marker.PinElement({
+               scale: 1.2,
+               background: PinColor.Hovered,
+               borderColor: PinColor.Hovered,
+               glyphColor: '#fff',
+            }).element;
+            marker.map?.panTo(marker.position!);
+         }
+      }
+
+      setLastHoveredPlace(hoveredPlace ?? null);
    }, [hoveredPlace]);
 
 
@@ -178,13 +214,16 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
          });
 
          // Add marker to map
-         const marker = new AdvancedMarkerElement({
+         const marker: MarkerWithPlaceId = new AdvancedMarkerElement({
             position: place.location,
             map: mapInstanceRef.current,
             title: place.displayName,
             content: bucketListPin.element,
             gmpClickable: true,
          });
+
+         // Set placeId to marker
+         marker.placeId = place.id;
 
 
          marker.addListener('click', () => {
@@ -195,11 +234,17 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
                lastOpenedMarker = null;
             }
             else {
+               /*
+               infoWindow will display the title text in white color, so we need to create a custom header element
+               to set the color and style of the title text.
+               Since infoWindow displays the content in a div, we can set the header content using setHeaderContent method.
+               */
                const header = document.createElement("div");
                header.innerText = marker.title;
                header.style.color = "black"; // or any other styling
                header.style.fontWeight = "bold";
                header.style.fontSize = "14px";
+
 
                infoWindow.setHeaderContent(header);
                infoWindow.open(marker.map, marker);
