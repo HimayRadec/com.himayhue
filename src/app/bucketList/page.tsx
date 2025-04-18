@@ -18,16 +18,13 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Actions
-import { addPlaceToBucketList, getBucketList } from '../actions/bucketList'
+import { getBucketList } from '../actions/bucketList'
 
 // Types
 import { BucketListPlace } from '@/types/bucketListTypes'
 
 
 export default function BucketList() {
-  const [viewMode, setViewMode] = useState<'search' | 'myList'>('search');
-  const [mapSearchQuery, setMapSearchQuery] = useState<string>('');
-  const [searchResultsDetails, setSearchResultsDetails] = useState<string>('');
   const [places, setPlaces] = useState<google.maps.places.Place[]>([]);
   const [bucketList, setBucketList] = useState<BucketListPlace[]>([]);
   const [hoveredPlace, setHoveredPlace] = useState<String | null>(null);
@@ -37,29 +34,19 @@ export default function BucketList() {
 
 
   useEffect(() => {
-    if (!userId || viewMode !== 'myList') return;
-
-    const fetchBucketList = async () => {
-      try {
-        const data = await getBucketList(userId);
-        setBucketList(data);
-      }
-      catch (error) {
-        console.error('Error fetching bucket list:', error);
-      }
-    };
-
-    fetchBucketList();
-  }, [viewMode, userId]);
-
-  useEffect(() => {
+    console.log(`user id: ${userId}`);
     if (!userId) return;
 
+
     const fetchBucketList = async () => {
+      console.log("Fetching bucket list for user:", userId);
       try {
         const data = await getBucketList(userId);
         setBucketList(data);
-      } catch (error) {
+
+        console.log("Fetched bucket list:", data);
+      }
+      catch (error) {
         console.error('Error fetching bucket list:', error);
       }
     };
