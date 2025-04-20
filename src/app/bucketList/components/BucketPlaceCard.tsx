@@ -21,7 +21,7 @@ import { BucketListPlace } from "@/types/bucketListTypes"
 interface Props {
    place: BucketListPlace;
    hoveredPlace: String | null;
-   setHoveredPlace: React.Dispatch<React.SetStateAction<String | null>>;
+   setHoveredPlace: React.Dispatch<React.SetStateAction<string | null>>;
    onRemove: (placeId: string) => void;
 }
 

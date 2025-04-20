@@ -9,20 +9,21 @@ import { BucketListPlace } from '@/types/bucketListTypes';
 interface GoogleMapProps {
    searchResultPlaces: google.maps.places.Place[];
    bucketListPlaces: BucketListPlace[];
-   hoveredPlace: String | null;
-   setHoveredPlace: React.Dispatch<React.SetStateAction<String | null>>;
+   hoveredPlace: string | null;
+   setHoveredPlace: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 interface MarkerWithPlaceId extends google.maps.marker.AdvancedMarkerElement {
-   placeId?: string | number;
+   placeId?: string;
 }
 
 
 export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hoveredPlace, setHoveredPlace }: GoogleMapProps) {
    const mapElement = useRef<HTMLDivElement>(null); // Reference to the map div element
    const mapInstanceRef = useRef<google.maps.Map | null>(null); // Google Map instance
+   const allMarkersMap = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
 
-   const [lastHoveredPlace, setLastHoveredPlace] = useState<String | null>(null);
+   const [lastHoveredPlace, setLastHoveredPlace] = useState<string | null>(null);
 
    const searchResultPlacesMarkers = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
    const bucketListPlacesMarkers = useRef<MarkerWithPlaceId[]>([]);
@@ -41,8 +42,18 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
    // Cleanup markers on unmount
    useEffect(() => {
       return () => {
-         searchResultPlacesMarkers.current.forEach(marker => marker.map = null);
+         searchResultPlacesMarkers.current.forEach(marker => {
+            allMarkersMap.current.delete(marker.title ?? "");
+            marker.map = null;
+         });
          searchResultPlacesMarkers.current = [];
+
+         bucketListPlacesMarkers.current.forEach(marker => {
+            if (marker.placeId) allMarkersMap.current.delete(marker.placeId);
+            marker.map = null;
+         });
+         bucketListPlacesMarkers.current = [];
+
       };
    }, []);
 
@@ -79,9 +90,8 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
 
       // Reset previous hover pin
       if (lastHoveredPlace && lastHoveredPlace !== hoveredPlace) {
-         const prevMarker = bucketListPlacesMarkers.current.find(
-            (marker) => marker.placeId === lastHoveredPlace
-         );
+         const prevMarker = allMarkersMap.current.get(lastHoveredPlace);
+
          if (prevMarker) {
             prevMarker.content = new google.maps.marker.PinElement({
                scale: 1.0,
@@ -94,7 +104,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
 
       // Highlight new hovered marker
       if (hoveredPlace) {
-         const marker = bucketListPlacesMarkers.current.find(marker => marker.placeId === hoveredPlace);
+         const marker = allMarkersMap.current.get(hoveredPlace);
          if (marker) {
             marker.content = new google.maps.marker.PinElement({
                scale: 1.2,
@@ -183,6 +193,9 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
          });
          searchResultPlacesMarkers.current.push(marker);
 
+         // Register marker in global map for hover functionality
+         allMarkersMap.current.set(place.id, marker);
+
       });
 
       mapInstanceRef.current?.fitBounds(bounds);
@@ -255,6 +268,9 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
          });
 
          bucketListPlacesMarkers.current.push(marker);
+
+         // Register marker in global map for hover functionality
+         allMarkersMap.current.set(place.id, marker);
       });
 
    }

@@ -27,7 +27,7 @@ import { BucketListPlace } from '@/types/bucketListTypes'
 export default function BucketList() {
   const [places, setPlaces] = useState<google.maps.places.Place[]>([]);
   const [bucketList, setBucketList] = useState<BucketListPlace[]>([]);
-  const [hoveredPlace, setHoveredPlace] = useState<String | null>(null);
+  const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -48,6 +48,10 @@ export default function BucketList() {
 
     fetchBucketList();
   }, [userId]);
+
+  useEffect(() => {
+    console.log("Hovered place:", hoveredPlace);
+  }, [hoveredPlace]);
 
 
   /** Handles removing a place from the bucket list.
@@ -84,8 +88,13 @@ export default function BucketList() {
 
 
     try {
+      // Add the place to the bucket list
       let formattedPlace: BucketListPlace = await addPlaceToBucketList(place);
       setBucketList((prev) => [...prev, formattedPlace]);
+
+      // Remove the place from the search results
+      setPlaces((prev) => prev.filter(p => p.id !== place.id));
+
       return true; // Indicate success
     }
     catch (err) {
@@ -118,6 +127,7 @@ export default function BucketList() {
               <TabsTrigger value='search' className='w-1/2 h-full rounded-none'>Search</TabsTrigger>
             </TabsList>
 
+            {/* Forced mount is used to keep the content mounted even when inactive to prevent card button states from resetting. */}
             <TabsContent value='bucket-list' className='data-[state=inactive]:hidden' forceMount>
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {bucketList.length === 0 ? (
@@ -138,7 +148,7 @@ export default function BucketList() {
                   <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
                   places.map((place, index) => (
-                    <PlaceResultCard key={index} place={place} onAdd={handleAddPlaceToBucketList} />
+                    <PlaceResultCard key={index} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onAdd={handleAddPlaceToBucketList} />
                   ))
                 )}
               </ScrollArea>

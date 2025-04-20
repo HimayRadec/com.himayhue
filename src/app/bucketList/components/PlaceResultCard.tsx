@@ -19,18 +19,27 @@ import { Button } from "@/components/ui/button"
 import { addPlaceToBucketList } from "@/app/actions/bucketList"
 import { BucketListPlace } from "@/types/bucketListTypes";
 import { on } from "events";
+import { cn } from "@/lib/utils"
 
 interface Props {
    place: google.maps.places.Place;
+   hoveredPlace: String | null;
+   setHoveredPlace: React.Dispatch<React.SetStateAction<string | null>>;
    onAdd: (place: google.maps.places.Place) => Promise<boolean>;
 }
 
-export function PlaceResultCard({ place, onAdd }: Props) {
+export function PlaceResultCard({ place, onAdd, hoveredPlace, setHoveredPlace }: Props) {
    const [buttonText, setButtonText] = useState("Add To Bucket List");
    const [disabled, setDisabled] = useState(false);
 
    return (
-      <Card>
+      <Card
+         onMouseEnter={() => setHoveredPlace(place.id)}
+         onMouseLeave={() => setHoveredPlace(null)}
+         className={cn(
+            "transition-all duration-200 ease-in-out relative",
+            hoveredPlace === place.id ? "bg-neutral-700" : "hover:bg-neutral-700"
+         )}      >
          <CardHeader>
             <CardTitle>{place.displayName}</CardTitle>
          </CardHeader>
