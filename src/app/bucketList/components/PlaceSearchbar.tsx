@@ -11,7 +11,7 @@ import { MdOutlineClear } from "react-icons/md";
 
 
 interface PlacesSearchbarProps {
-   UpdatePlacesResults: React.Dispatch<React.SetStateAction<google.maps.places.Place[]>>;
+   UpdatePlacesResults: (places: google.maps.places.Place[]) => void;
 }
 
 
@@ -75,10 +75,8 @@ export default function PlacesSearchbar({ UpdatePlacesResults }: PlacesSearchbar
                            <input
                               placeholder="Search Google Maps"
                               {...field}
-                              onChange={(event) => {
-                                 field.onChange(event);
-                              }}
-                              className="w-full border-none ml-2 placeholder:text-muted-foreground text-sm font-medium leading-tight focus:outline-none focus:ring-0 focus:border-none"
+                              onChange={(event) => field.onChange(event)}
+                              className="w-full bg-transparent border-none ml-2 placeholder:text-muted-foreground text-sm font-medium leading-tight focus:outline-none focus:ring-0 focus:border-none"
                            />
                         </FormControl>
                      </FormItem>
@@ -93,7 +91,8 @@ export default function PlacesSearchbar({ UpdatePlacesResults }: PlacesSearchbar
                   onClick={() => {
                      form.setValue("searchInput", "");
                      UpdatePlacesResults([]);
-                  }}               >
+                  }}
+               >
                   <MdOutlineClear />
                </Button>
             </div>

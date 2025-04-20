@@ -11,7 +11,7 @@ export default function NavBar() {
    console.log(session);
 
    return (
-      <header className="sticky w-full top-0 bg-background px-3 shadow-sm border-b">
+      <header className="sticky w-full top-0 bg-background px-3 shadow-sm">
          <nav className="mx-auto flex h-14 items-center justify-between gap-3">
             <Link href="/" className="font-bold">
                HOME

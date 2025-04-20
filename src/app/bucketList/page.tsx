@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react'
 // Components
 import GoogleMap from './components/GoogleMap'
 import { PlaceResultCard } from './components/PlaceResultCard'
-import PlacesSearchbar from './components/PlaceSearchbar'
+import PlacesSearchbar from './components/PlaceSearchBar'
 import { BucketPlaceCard } from './components/BucketPlaceCard'
 
 // UI
@@ -57,15 +57,17 @@ export default function BucketList() {
    * */
   async function handleRemovePlace(placeId: string) {
     if (!userId) return;
+    const prev = bucketList;
     try {
-      await removePlaceFromBucketList(placeId, userId!);
       setBucketList((prev) => prev.filter(place => place.id !== placeId));
-    }
-    catch (err) {
+      await removePlaceFromBucketList(placeId, userId);
+    } catch (err) {
       console.error("Error removing place:", err);
-      // optionally show an error toast or revert UI
+      setBucketList(prev); // Revert state on failure
+      // Optionally show toast or alert
     }
   }
+
 
 
   /** Handles adding a place to the bucket list.
@@ -92,6 +94,13 @@ export default function BucketList() {
     }
   }
 
+  function handleSearchbarResults(results: google.maps.places.Place[]) {
+    // filter out places that are already in the bucket list
+    const filteredPlaceResults = results.filter(place => !bucketList.some(bucketPlace => bucketPlace.id === place.id));
+    setPlaces(filteredPlaceResults);
+  }
+
+
 
   return (
     <div className="flex flex-grow border-t overflow-hidden">
@@ -102,12 +111,11 @@ export default function BucketList() {
       <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
         <div className="w-full border-b border-neutral-800 flex flex-col justify-between items-center">
 
-          <PlacesSearchbar UpdatePlacesResults={setPlaces} />
 
-          <Tabs defaultValue='bucket-list' className='w-full rounded-none border'>
+          <Tabs defaultValue='bucket-list' className='w-full rounded-none'>
             <TabsList className='w-full'>
-              <TabsTrigger value='bucket-list'>Bucket List</TabsTrigger>
-              <TabsTrigger value='search'>Search</TabsTrigger>
+              <TabsTrigger value='bucket-list' className='w-1/2 h-full rounded-none'>Bucket List</TabsTrigger>
+              <TabsTrigger value='search' className='w-1/2 h-full rounded-none'>Search</TabsTrigger>
             </TabsList>
 
             <TabsContent value='bucket-list'>
@@ -123,6 +131,8 @@ export default function BucketList() {
             </TabsContent>
 
             <TabsContent value='search'>
+              <PlacesSearchbar UpdatePlacesResults={handleSearchbarResults} />
+
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {places.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">No results found</p>
