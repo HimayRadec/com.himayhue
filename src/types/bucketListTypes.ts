@@ -1,21 +1,32 @@
-export type BucketListPlace = {
+import { ObjectId } from 'mongodb';
+
+export interface BucketListLocation {
+   lat: number;
+   lng: number;
+}
+
+export interface BucketListPlace {
    id: string;
+   formattedAddress: string;
+   displayName: string;
+   location: BucketListLocation;
    dateAdded: string;
    dateVisited?: string;
-   displayName: string;
-   formattedAddress: string;
    googleMapsURI?: string;
-   location: {
-      lat: number;
-      lng: number;
-   };
    websiteURI?: string;
 };
 
-export type BucketList = {
+export interface BucketList {
    userId: string;
    places: BucketListPlace[];
 };
+
+export interface BucketListDocument {
+   _id: ObjectId;
+   userId: string;
+   places: BucketListPlace[];
+   updatedAt: Date; // or `Date` if you convert it on fetch
+}
 
 export enum PinColor {
    Visited = '#00A000',   // ✅ Green for visited spots
@@ -23,3 +34,4 @@ export enum PinColor {
    Result = '#DC2626',    // 🔍 Red for search results
    Hovered = '#000000',   // ⚪ Optional: Black border for hovered spots
 }
+

@@ -1,10 +1,11 @@
 'use server';
 
-import { BucketListPlace } from "@/types/bucketListTypes";
+import { BucketListPlace, BucketListDocument } from "@/types/bucketListTypes";
 import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
+import BucketList from "../bucketList/page";
 
-export async function addPlaceToBucketList(googlePlace: google.maps.places.Place) {
+export async function addPlaceToBucketList(googlePlace: google.maps.places.Place): Promise<BucketListPlace> {
    const session = await auth();
    const userId = session?.user?.id;
 
@@ -15,8 +16,8 @@ export async function addPlaceToBucketList(googlePlace: google.maps.places.Place
       formattedAddress: googlePlace.formattedAddress as string,
       displayName: googlePlace.displayName as string,
       location: {
-         lat: googlePlace.location.lat ?? 0,
-         lng: googlePlace.location.lng ?? 0,
+         lat: googlePlace.location?.lat,
+         lng: googlePlace.location?.lng,
       },
       dateAdded: new Date().toISOString(),
       dateVisited: undefined,
@@ -28,7 +29,7 @@ export async function addPlaceToBucketList(googlePlace: google.maps.places.Place
    const db = client.db();
 
    await db.collection('bucketlist').updateOne(
-      { userId },
+      { userId, "places.id": { $ne: place.id } }, // only update if the place isn't already there
       {
          $addToSet: { places: place },
          $setOnInsert: { userId },
@@ -36,6 +37,8 @@ export async function addPlaceToBucketList(googlePlace: google.maps.places.Place
       },
       { upsert: true }
    );
+
+   return place;
 }
 
 export async function getBucketList(userId: string): Promise<BucketListPlace[]> {
@@ -46,4 +49,27 @@ export async function getBucketList(userId: string): Promise<BucketListPlace[]> 
    const bucketList = await db.collection('bucketlist').findOne({ userId });
 
    return bucketList?.places || [];
+}
+
+/* * Removes a place from the user's bucket list.
+   * @param placeId - The ID of the place to remove.
+   * @param userId - The ID of the user whose bucket list is being modified.
+   * @throws Will throw an error if the user is not authenticated.
+   */
+export async function removePlaceFromBucketList(placeId: string, userId: string) {
+
+   if (!userId) throw new Error("User not authenticated");
+
+   const client = await clientPromise;
+   const db = client.db();
+
+   const collection = db.collection<BucketListDocument>("bucketlist");
+
+   await collection.updateOne(
+      { userId },
+      {
+         $pull: { places: { id: placeId } },
+         $currentDate: { updatedAt: true },
+      }
+   );
 }

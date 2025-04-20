@@ -1,6 +1,9 @@
 // Next.js & Routing
 import Link from "next/link"
 
+// React
+import { useState } from "react"
+
 // Components
 import {
    Card,
@@ -14,12 +17,18 @@ import { Button } from "@/components/ui/button"
 
 // Actions
 import { addPlaceToBucketList } from "@/app/actions/bucketList"
+import { BucketListPlace } from "@/types/bucketListTypes";
+import { on } from "events";
 
 interface Props {
    place: google.maps.places.Place;
+   onAdd: (place: google.maps.places.Place) => Promise<boolean>;
 }
 
-export function PlaceResultCard({ place }: Props) {
+export function PlaceResultCard({ place, onAdd }: Props) {
+   const [buttonText, setButtonText] = useState("Add To Bucket List");
+   const [disabled, setDisabled] = useState(false);
+
    return (
       <Card>
          <CardHeader>
@@ -42,12 +51,27 @@ export function PlaceResultCard({ place }: Props) {
          </CardContent>
          <CardFooter>
             <Button
-               onClick={() => addPlaceToBucketList(place)}
+               onClick={async () => {
+                  setButtonText("Adding...");
+                  setDisabled(true);
+                  const success = await onAdd(place);
+                  if (success) {
+                     setButtonText("Added!");
+                  }
+                  else {
+                     setButtonText("Failed. Try again");
+                     setDisabled(false);
+                     setTimeout(() => setButtonText("Add To Bucket List"), 2000);
+                  }
+               }}
+               disabled={disabled}
                className="mt-3 w-full px-4 py-2"
             >
-               Add to List
+               {buttonText}
             </Button>
+
          </CardFooter>
+
       </Card>
    )
 }

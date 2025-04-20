@@ -18,7 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Actions
-import { getBucketList } from '../actions/bucketList'
+import { getBucketList, removePlaceFromBucketList, addPlaceToBucketList } from '../actions/bucketList'
 
 // Types
 import { BucketListPlace } from '@/types/bucketListTypes'
@@ -34,17 +34,12 @@ export default function BucketList() {
 
 
   useEffect(() => {
-    console.log(`user id: ${userId}`);
     if (!userId) return;
 
-
     const fetchBucketList = async () => {
-      console.log("Fetching bucket list for user:", userId);
       try {
         const data = await getBucketList(userId);
         setBucketList(data);
-
-        console.log("Fetched bucket list:", data);
       }
       catch (error) {
         console.error('Error fetching bucket list:', error);
@@ -54,9 +49,48 @@ export default function BucketList() {
     fetchBucketList();
   }, [userId]);
 
-  useEffect(() => {
-    console.log('Hovered place:', hoveredPlace);
-  }, [hoveredPlace]);
+
+  /** Handles removing a place from the bucket list.
+    @param placeId - The ID of the place to remove.
+    @returns {Promise<void>} - A promise that resolves when the place is removed.
+    @throws Will log an error if the removal fails.
+   * */
+  async function handleRemovePlace(placeId: string) {
+    if (!userId) return;
+    try {
+      await removePlaceFromBucketList(placeId, userId!);
+      setBucketList((prev) => prev.filter(place => place.id !== placeId));
+    }
+    catch (err) {
+      console.error("Error removing place:", err);
+      // optionally show an error toast or revert UI
+    }
+  }
+
+
+  /** Handles adding a place to the bucket list.
+    @param place - The place to add, as a google.maps.places.Place object.
+    @returns {Promise<boolean>} - A promise that resolves to true if the place was added successfully, false otherwise.
+    @throws Will log an error if the addition fails.
+   * */
+  async function handleAddPlaceToBucketList(place: google.maps.places.Place): Promise<boolean> {
+    if (!userId) return false;
+
+    // Check if the place is already in the bucket list
+    const isAlreadyAdded = bucketList.some((p) => p.id === place.id);
+    if (isAlreadyAdded) return false;
+
+
+    try {
+      let formattedPlace: BucketListPlace = await addPlaceToBucketList(place);
+      setBucketList((prev) => [...prev, formattedPlace]);
+      return true; // Indicate success
+    }
+    catch (err) {
+      console.error("Error adding place to bucket list:", err);
+      return false; // Indicate failure
+    }
+  }
 
 
   return (
@@ -79,22 +113,22 @@ export default function BucketList() {
             <TabsContent value='bucket-list'>
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {bucketList.length === 0 ? (
-                  <p className="text-gray-400 text-center">Your bucket list is empty.</p>
+                  <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
                 ) : (
-                  bucketList.map((place, index) => (
-                    <BucketPlaceCard key={index} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
+                  bucketList.map((place) => (
+                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlace} />
                   ))
                 )}
               </ScrollArea>
             </TabsContent>
 
             <TabsContent value='search'>
-              <ScrollArea className="w-full p-4 flex flex-col space-y-4 max-h-[calc(100vh-8rem)] ">
+              <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {places.length === 0 ? (
-                  <p className="text-gray-400 text-center">No results found</p>
+                  <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
                   places.map((place, index) => (
-                    <PlaceResultCard key={index} place={place} />
+                    <PlaceResultCard key={index} place={place} onAdd={handleAddPlaceToBucketList} />
                   ))
                 )}
               </ScrollArea>
