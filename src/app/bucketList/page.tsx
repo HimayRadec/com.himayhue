@@ -118,7 +118,7 @@ export default function BucketList() {
               <TabsTrigger value='search' className='w-1/2 h-full rounded-none'>Search</TabsTrigger>
             </TabsList>
 
-            <TabsContent value='bucket-list'>
+            <TabsContent value='bucket-list' className='data-[state=inactive]:hidden' forceMount>
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
                 {bucketList.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
@@ -130,7 +130,7 @@ export default function BucketList() {
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value='search'>
+            <TabsContent value='search' className='data-[state=inactive]:hidden' forceMount>
               <PlacesSearchbar UpdatePlacesResults={handleSearchbarResults} />
 
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
