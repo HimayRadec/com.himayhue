@@ -9,13 +9,25 @@ export default function NavBar() {
    const session = useSession();
    const user = session.data?.user;
    console.log(session);
+   const links = ["bucketList"]
+
    return (
-      <header className="sticky top-0 bg-background px-3 shadow-sm">
-         <nav className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3">
-            <Link href="/" className="font-bold">
-               Next-Auth v5 Tutorial
-            </Link>
-            {user && <UserButton user={user} />}
+      <header className="sticky w-full top-0 bg-background px-3 shadow-sm">
+         <nav className="mx-auto flex h-14 items-center justify-between gap-3">
+            <div>
+               <Link href="/" className="">
+                  Home
+               </Link>
+               <Link href="/bucketList" className="ml-4">
+                  Bucket List
+               </Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+               {user && user.name}
+               {user && <UserButton user={user} />}
+            </div>
+
             {!user && session.status !== "loading" && <SignInButton />}
          </nav>
       </header>
