@@ -18,7 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Actions
-import { getBucketList, removePlaceFromBucketList, addPlaceToBucketList } from '../actions/bucketList'
+import { getBucketList, removePlaceFromBucketList, addPlaceToBucketList, markPlaceAsVisited, unmarkPlaceAsVisited } from '../actions/bucketList'
 
 // Types
 import { BucketListPlace } from '@/types/bucketListTypes'
@@ -104,6 +104,34 @@ export default function BucketList() {
     }
   }
 
+  async function handleToggleVisited(placeId: string, visited: boolean): Promise<boolean> {
+    if (!userId) return false;
+    try {
+      if (visited) {
+        await markPlaceAsVisited(placeId, userId);
+      }
+      else {
+        await unmarkPlaceAsVisited(placeId, userId);
+      }
+
+      setBucketListPlaces(prev =>
+        prev.map(place =>
+          place.id === placeId
+            ? { ...place, dateVisited: visited ? new Date().toISOString() : undefined }
+            : place
+        )
+      );
+
+      console.log(`Place ${placeId} marked as ${visited ? 'visited' : 'unvisited'}`);
+
+      return true;
+    } catch (err) {
+      console.error("Error toggling visited state:", err);
+      return false;
+    }
+  }
+
+
   function handleSearchbarResults(results: google.maps.places.Place[]) {
     // filter out places that are already in the bucket list
     const filteredPlaceResults = results.filter(place => !bucketListPlaces.some(bucketPlace => bucketPlace.id === place.id));
@@ -134,7 +162,7 @@ export default function BucketList() {
                   <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
                 ) : (
                   bucketListPlaces.map((place) => (
-                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlace} />
+                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlace} toggleVisit={handleToggleVisited} />
                   ))
                 )}
               </ScrollArea>

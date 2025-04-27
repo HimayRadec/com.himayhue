@@ -78,3 +78,39 @@ export async function removePlaceFromBucketList(placeId: string, userId: string)
       }
    );
 }
+
+export async function markPlaceAsVisited(placeId: string, userId: string) {
+   if (!userId) throw new Error("User not authenticated");
+
+   const client = await clientPromise;
+   const db = client.db();
+
+   const collection = db.collection<BucketListDocument>("bucketlist");
+
+   await collection.updateOne(
+      { userId, "places.id": placeId },
+      {
+         $set: { "places.$.dateVisited": new Date().toISOString() },
+         $currentDate: { updatedAt: true },
+      }
+   );
+   console.log(`Marked place ${placeId} as visited for user ${userId}`);
+}
+
+export async function unmarkPlaceAsVisited(placeId: string, userId: string) {
+   if (!userId) throw new Error("User not authenticated");
+
+   const client = await clientPromise;
+   const db = client.db();
+
+   const collection = db.collection<BucketListDocument>("bucketlist");
+
+   await collection.updateOne(
+      { userId, "places.id": placeId },
+      {
+         $unset: { "places.$.dateVisited": "" },
+         $currentDate: { updatedAt: true },
+      }
+   );
+   console.log(`Unmarked place ${placeId} as visited for user ${userId}`);
+}

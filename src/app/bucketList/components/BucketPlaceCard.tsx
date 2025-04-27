@@ -23,13 +23,14 @@ interface Props {
    hoveredPlace: String | null;
    setHoveredPlace: React.Dispatch<React.SetStateAction<string | null>>;
    onRemove: (placeId: string) => void;
+   toggleVisit: (placeId: string, visited: boolean) => Promise<boolean>;
 }
 
 //
 
 
 
-export function BucketPlaceCard({ place, setHoveredPlace, hoveredPlace, onRemove }: Props) {
+export function BucketPlaceCard({ place, setHoveredPlace, hoveredPlace, onRemove, toggleVisit }: Props) {
    function RemovePlaceButton({ placeId, onRemove }: { placeId: string; onRemove: (id: string) => void }) {
       return (
          <button
@@ -72,10 +73,18 @@ export function BucketPlaceCard({ place, setHoveredPlace, hoveredPlace, onRemove
          </CardContent>
          <CardFooter>
             <Button
-               variant={"unvisitedPlace"}
-               className="mt-3 w-full px-4 py-2"
+               variant={"default"}
+               onClick={() => toggleVisit(place.id, place.dateVisited ? false : true)}
+               className={cn(
+                  "mt-3 w-full px-4 py-2 transition-colors duration-200",
+                  place.dateVisited
+                     ? "bg-green-600 hover:bg-green-700 text-white"  // Visited
+                     : "bg-gray-600 hover:bg-gray-700 text-white"    // Unvisited
+               )}
+
             >
-               Unvisited
+
+               {place.dateVisited ? "Unmark as Visited" : "Mark as Visited"}
             </Button>
          </CardFooter>
       </Card>
