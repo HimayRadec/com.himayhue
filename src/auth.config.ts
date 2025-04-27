@@ -5,7 +5,7 @@ import type { NextAuthConfig } from "next-auth"
 
 export default {
    providers: [
-      Apple,
+      // Apple,
       GitHub,
       Google({
          clientId: process.env.GOOGLE_CLIENT_ID,
