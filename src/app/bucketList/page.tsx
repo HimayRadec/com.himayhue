@@ -89,7 +89,6 @@ export default function BucketList() {
 
 
     try {
-      // Add the place to the bucket list
       let formattedPlace: BucketListPlace = {
         id: place.id,
         formattedAddress: place.formattedAddress as string,
@@ -104,6 +103,7 @@ export default function BucketList() {
         websiteURI: place.websiteURI || undefined,
       };
       await addPlaceToBucketList(formattedPlace);
+
       setBucketListPlaces((prev) => [...prev, formattedPlace]);
 
       // Remove the place from the search results

@@ -13,8 +13,6 @@ export async function addPlaceToBucketList(place: BucketListPlace): Promise<Buck
    console.log('Adding place to bucket list for user:', userId, 'Place:', place);
 
    try {
-      // TODO: Learn what this does and if it is necessary
-
       const client = await clientPromise;
       const db = client.db();
 
