@@ -15,6 +15,7 @@ interface GoogleMapProps {
 
 interface MarkerWithPlaceId extends google.maps.marker.AdvancedMarkerElement {
    placeId?: string;
+   color?: PinColor; // Optional color property for custom pin colors
 }
 
 
@@ -95,8 +96,8 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
          if (prevMarker) {
             prevMarker.content = new google.maps.marker.PinElement({
                scale: 1.0,
-               background: PinColor.Unvisited,
-               borderColor: PinColor.Unvisited,
+               background: (prevMarker as MarkerWithPlaceId).color,
+               borderColor: (prevMarker as MarkerWithPlaceId).color,
                glyphColor: '#fff',
             }).element;
          }
@@ -185,11 +186,26 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
          });
 
          // Add marker to map
-         const marker = new AdvancedMarkerElement({
+         const marker: MarkerWithPlaceId = new AdvancedMarkerElement({
             position: place.location || { lat: 0, lng: 0 },
             map: mapInstanceRef.current,
             title: place.displayName || "Result",
             content: searchResultPin.element,
+            gmpClickable: true,
+         });
+
+
+         marker.placeId = place.id; // Allows us to identify the marker by place ID when clicked
+         marker.color = PinColor.Result; // Allows resetting the color later when unhovered
+
+         marker.addListener('click', () => {
+            // If the marker is already hovered, unhover it
+            if (hoveredPlace === place.id) {
+               setHoveredPlace(null);
+            }
+            else {
+               setHoveredPlace(place.id);
+            }
          });
          searchResultPlacesMarkers.current.push(marker);
 
@@ -240,6 +256,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
 
          // Set placeId to marker
          marker.placeId = place.id;
+         marker.color = place.dateVisited ? PinColor.Visited : PinColor.Unvisited; // Set color based on visited status
 
 
          marker.addListener('click', () => {
