@@ -1,15 +1,11 @@
 import { ObjectId } from 'mongodb';
 
-export interface BucketListLocation {
-   lat: number;
-   lng: number;
-}
 
 export interface BucketListPlace {
    id: string;
    formattedAddress: string;
    displayName: string;
-   location: BucketListLocation;
+   location: google.maps.LatLngLiteral;
    dateAdded: string;
    dateVisited?: string;
    googleMapsURI?: string;

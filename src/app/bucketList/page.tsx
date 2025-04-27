@@ -25,9 +25,9 @@ import { BucketListPlace } from '@/types/bucketListTypes'
 
 
 export default function BucketList() {
-  const [places, setPlaces] = useState<google.maps.places.Place[]>([]);
-  const [bucketList, setBucketList] = useState<BucketListPlace[]>([]);
-  const [hoveredPlace, setHoveredPlace] = useState<string | null>(null);
+  const [placesResults, setPlacesResults] = useState<google.maps.places.Place[]>([]);
+  const [bucketListPlaces, setBucketListPlaces] = useState<BucketListPlace[]>([]);
+  const [hoveredPlace, setHoveredPlace] = useState<string | null>(null); // Can be a Map Marker or a Place Card
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -39,7 +39,7 @@ export default function BucketList() {
     const fetchBucketList = async () => {
       try {
         const data = await getBucketList(userId);
-        setBucketList(data);
+        setBucketListPlaces(data);
       }
       catch (error) {
         console.error('Error fetching bucket list:', error);
@@ -59,15 +59,16 @@ export default function BucketList() {
     @returns {Promise<void>} - A promise that resolves when the place is removed.
     @throws Will log an error if the removal fails.
    * */
-  async function handleRemovePlace(placeId: string) {
+  async function handleRemovePlace(placeId: string): Promise<void> {
     if (!userId) return;
-    const prev = bucketList;
+    const prev = bucketListPlaces;
     try {
-      setBucketList((prev) => prev.filter(place => place.id !== placeId));
+      setBucketListPlaces((prev) => prev.filter(place => place.id !== placeId));
       await removePlaceFromBucketList(placeId, userId);
-    } catch (err) {
+    }
+    catch (err) {
       console.error("Error removing place:", err);
-      setBucketList(prev); // Revert state on failure
+      setBucketListPlaces(prev); // Revert state on failure
       // Optionally show toast or alert
     }
   }
@@ -83,17 +84,17 @@ export default function BucketList() {
     if (!userId) return false;
 
     // Check if the place is already in the bucket list
-    const isAlreadyAdded = bucketList.some((p) => p.id === place.id);
+    const isAlreadyAdded = bucketListPlaces.some((p) => p.id === place.id);
     if (isAlreadyAdded) return false;
 
 
     try {
       // Add the place to the bucket list
       let formattedPlace: BucketListPlace = await addPlaceToBucketList(place);
-      setBucketList((prev) => [...prev, formattedPlace]);
+      setBucketListPlaces((prev) => [...prev, formattedPlace]);
 
       // Remove the place from the search results
-      setPlaces((prev) => prev.filter(p => p.id !== place.id));
+      setPlacesResults((prev) => prev.filter(p => p.id !== place.id));
 
       return true; // Indicate success
     }
@@ -105,23 +106,22 @@ export default function BucketList() {
 
   function handleSearchbarResults(results: google.maps.places.Place[]) {
     // filter out places that are already in the bucket list
-    const filteredPlaceResults = results.filter(place => !bucketList.some(bucketPlace => bucketPlace.id === place.id));
-    setPlaces(filteredPlaceResults);
+    const filteredPlaceResults = results.filter(place => !bucketListPlaces.some(bucketPlace => bucketPlace.id === place.id));
+    setPlacesResults(filteredPlaceResults);
   }
 
 
 
   return (
-    <div className="flex flex-grow border-t overflow-hidden">
+    <div className="flex flex-grow overflow-hidden">
       {/* Map Section */}
-      <GoogleMap searchResultPlaces={places} bucketListPlaces={bucketList} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
+      <GoogleMap searchResultPlaces={placesResults} bucketListPlaces={bucketListPlaces} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
 
       {/* Sidebar */}
-      <div className="w-1/3 bg-neutral-950 flex flex-col border-l border-neutral-800 ">
-        <div className="w-full border-b border-neutral-800 flex flex-col justify-between items-center">
+      <div className="w-1/3 bg-neutral-950 flex flex-col border-neutral-800 ">
+        <div className="w-full border-neutral-800 flex flex-col justify-between items-center">
 
-
-          <Tabs defaultValue='bucket-list' className='w-full rounded-none'>
+          <Tabs defaultValue='bucket-list' className='w-full rounded-none border-t'>
             <TabsList className='w-full'>
               <TabsTrigger value='bucket-list' className='w-1/2 h-full rounded-none'>Bucket List</TabsTrigger>
               <TabsTrigger value='search' className='w-1/2 h-full rounded-none'>Search</TabsTrigger>
@@ -130,10 +130,10 @@ export default function BucketList() {
             {/* Forced mount is used to keep the content mounted even when inactive to prevent card button states from resetting. */}
             <TabsContent value='bucket-list' className='data-[state=inactive]:hidden' forceMount>
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
-                {bucketList.length === 0 ? (
+                {bucketListPlaces.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
                 ) : (
-                  bucketList.map((place) => (
+                  bucketListPlaces.map((place) => (
                     <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlace} />
                   ))
                 )}
@@ -144,10 +144,10 @@ export default function BucketList() {
               <PlacesSearchbar UpdatePlacesResults={handleSearchbarResults} />
 
               <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
-                {places.length === 0 ? (
+                {placesResults.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
-                  places.map((place, index) => (
+                  placesResults.map((place, index) => (
                     <PlaceResultCard key={index} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onAdd={handleAddPlaceToBucketList} />
                   ))
                 )}

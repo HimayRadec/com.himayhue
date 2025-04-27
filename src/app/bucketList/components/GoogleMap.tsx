@@ -210,6 +210,7 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
 
       if (!places.length) return;
 
+      const bounds = new google.maps.LatLngBounds();
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
 
       const infoWindow = new google.maps.InfoWindow();
@@ -218,6 +219,8 @@ export default function GoogleMap({ searchResultPlaces, bucketListPlaces, hovere
 
       // Create a new marker for each place
       places.forEach(place => {
+         if (place.location) bounds.extend(place.location);
+
          // Create Pin
          const bucketListPin = new PinElement({
             scale: 1.0,

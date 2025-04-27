@@ -8,37 +8,42 @@ import BucketList from "../bucketList/page";
 export async function addPlaceToBucketList(googlePlace: google.maps.places.Place): Promise<BucketListPlace> {
    const session = await auth();
    const userId = session?.user?.id;
-
    if (!userId) throw new Error('User not authenticated');
 
-   const place: BucketListPlace = {
-      id: googlePlace.id,
-      formattedAddress: googlePlace.formattedAddress as string,
-      displayName: googlePlace.displayName as string,
-      location: {
-         lat: googlePlace.location?.lat,
-         lng: googlePlace.location?.lng,
-      },
-      dateAdded: new Date().toISOString(),
-      dateVisited: undefined,
-      googleMapsURI: googlePlace.googleMapsURI || undefined,
-      websiteURI: googlePlace.websiteURI || undefined,
-   };
+   try {
+      const place: BucketListPlace = {
+         id: googlePlace.id,
+         formattedAddress: googlePlace.formattedAddress as string,
+         displayName: googlePlace.displayName as string,
+         location: {
+            lat: googlePlace.location!.lat, // Unsure why these are red but they work correctly
+            lng: googlePlace.location!.lng, // Unsure why these are red but they work correctly
+         },
+         dateAdded: new Date().toISOString(),
+         dateVisited: undefined,
+         googleMapsURI: googlePlace.googleMapsURI || undefined,
+         websiteURI: googlePlace.websiteURI || undefined,
+      };
 
-   const client = await clientPromise;
-   const db = client.db();
+      const client = await clientPromise;
+      const db = client.db();
 
-   await db.collection('bucketlist').updateOne(
-      { userId, "places.id": { $ne: place.id } }, // only update if the place isn't already there
-      {
-         $addToSet: { places: place },
-         $setOnInsert: { userId },
-         $currentDate: { updatedAt: true },
-      },
-      { upsert: true }
-   );
+      await db.collection('bucketlist').updateOne(
+         { userId, "places.id": { $ne: place.id } }, // only update if the place isn't already there
+         {
+            $addToSet: { places: place },
+            $setOnInsert: { userId },
+            $currentDate: { updatedAt: true },
+         },
+         { upsert: true }
+      );
 
-   return place;
+      return place;
+   }
+   catch (error) {
+      console.error("Error in addPlaceToBucketList:", error);
+      throw new Error("Failed to add place to bucket list");
+   }
 }
 
 export async function getBucketList(userId: string): Promise<BucketListPlace[]> {
