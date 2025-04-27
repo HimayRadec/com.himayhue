@@ -90,7 +90,20 @@ export default function BucketList() {
 
     try {
       // Add the place to the bucket list
-      let formattedPlace: BucketListPlace = await addPlaceToBucketList(place);
+      let formattedPlace: BucketListPlace = {
+        id: place.id,
+        formattedAddress: place.formattedAddress as string,
+        displayName: place.displayName as string,
+        location: {
+          lat: place.location!.lat(),
+          lng: place.location!.lng(),
+        },
+        dateAdded: new Date().toISOString(),
+        dateVisited: undefined,
+        googleMapsURI: place.googleMapsURI || undefined,
+        websiteURI: place.websiteURI || undefined,
+      };
+      await addPlaceToBucketList(formattedPlace);
       setBucketListPlaces((prev) => [...prev, formattedPlace]);
 
       // Remove the place from the search results

@@ -5,25 +5,15 @@ import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
 import BucketList from "../bucketList/page";
 
-export async function addPlaceToBucketList(googlePlace: google.maps.places.Place): Promise<BucketListPlace> {
+export async function addPlaceToBucketList(place: BucketListPlace): Promise<BucketListPlace> {
    const session = await auth();
    const userId = session?.user?.id;
    if (!userId) throw new Error('User not authenticated');
 
+   console.log('Adding place to bucket list for user:', userId, 'Place:', place);
+
    try {
-      const place: BucketListPlace = {
-         id: googlePlace.id,
-         formattedAddress: googlePlace.formattedAddress as string,
-         displayName: googlePlace.displayName as string,
-         location: {
-            lat: googlePlace.location!.lat, // Unsure why these are red but they work correctly
-            lng: googlePlace.location!.lng, // Unsure why these are red but they work correctly
-         },
-         dateAdded: new Date().toISOString(),
-         dateVisited: undefined,
-         googleMapsURI: googlePlace.googleMapsURI || undefined,
-         websiteURI: googlePlace.websiteURI || undefined,
-      };
+      // TODO: Learn what this does and if it is necessary
 
       const client = await clientPromise;
       const db = client.db();
@@ -41,8 +31,7 @@ export async function addPlaceToBucketList(googlePlace: google.maps.places.Place
       return place;
    }
    catch (error) {
-      console.error("Error in addPlaceToBucketList:", error);
-      throw new Error("Failed to add place to bucket list");
+      throw new Error("Failed to add place to bucket list: " + error);
    }
 }
 
