@@ -45,8 +45,10 @@ export function BucketPlaceCard({ place, setHoveredPlace, hoveredPlace, onRemove
    return (
 
       <Card
-         onMouseEnter={() => setHoveredPlace(place.id)}
-         onMouseLeave={() => setHoveredPlace(null)}
+         onClick={() => {
+            if (hoveredPlace !== place.id) setHoveredPlace(place.id);
+            else setHoveredPlace(null);
+         }}
          className={cn(
             "transition-all duration-200 ease-in-out relative",
             hoveredPlace === place.id ? "bg-neutral-700" : "hover:bg-neutral-700"

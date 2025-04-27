@@ -15,8 +15,6 @@ export default async function Page() {
   return (
     <div className="flex items-center flex-col justify-center">
       <pre>{JSON.stringify(session, null, 2)}</pre>
-      <div>User ID: {userId}</div>
-
     </div>
   )
 }

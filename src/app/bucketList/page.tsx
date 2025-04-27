@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react'
 // Components
 import GoogleMap from './components/GoogleMap'
 import { PlaceResultCard } from './components/PlaceResultCard'
-import PlacesSearchbar from './components/PlaceSearchBar'
+import PlacesSearchbar from './components/PlaceSearchbar'
 import { BucketPlaceCard } from './components/BucketPlaceCard'
 
 // UI
@@ -59,7 +59,7 @@ export default function BucketList() {
     @returns {Promise<void>} - A promise that resolves when the place is removed.
     @throws Will log an error if the removal fails.
    * */
-  async function handleRemovePlace(placeId: string): Promise<void> {
+  async function handleRemovePlaceToBucketList(placeId: string): Promise<void> {
     if (!userId) return;
     const prev = bucketListPlaces;
     try {
@@ -122,10 +122,9 @@ export default function BucketList() {
         )
       );
 
-      console.log(`Place ${placeId} marked as ${visited ? 'visited' : 'unvisited'}`);
-
       return true;
-    } catch (err) {
+    }
+    catch (err) {
       console.error("Error toggling visited state:", err);
       return false;
     }
@@ -162,7 +161,7 @@ export default function BucketList() {
                   <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
                 ) : (
                   bucketListPlaces.map((place) => (
-                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlace} toggleVisit={handleToggleVisited} />
+                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlaceToBucketList} toggleVisit={handleToggleVisited} />
                   ))
                 )}
               </ScrollArea>
@@ -176,7 +175,7 @@ export default function BucketList() {
                   <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
                   placesResults.map((place, index) => (
-                    <PlaceResultCard key={index} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onAdd={handleAddPlaceToBucketList} />
+                    <PlaceResultCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onAdd={handleAddPlaceToBucketList} />
                   ))
                 )}
               </ScrollArea>

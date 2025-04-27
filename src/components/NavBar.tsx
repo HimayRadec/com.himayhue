@@ -9,13 +9,20 @@ export default function NavBar() {
    const session = useSession();
    const user = session.data?.user;
    console.log(session);
+   const links = ["bucketList"]
 
    return (
       <header className="sticky w-full top-0 bg-background px-3 shadow-sm">
          <nav className="mx-auto flex h-14 items-center justify-between gap-3">
-            <Link href="/" className="font-bold">
-               HOME
-            </Link>
+            <div>
+               <Link href="/" className="">
+                  Home
+               </Link>
+               <Link href="/bucketList" className="ml-4">
+                  Bucket List
+               </Link>
+            </div>
+
             <div className="flex items-center gap-3">
                {user && user.name}
                {user && <UserButton user={user} />}

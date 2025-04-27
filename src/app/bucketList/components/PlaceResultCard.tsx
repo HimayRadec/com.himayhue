@@ -34,8 +34,10 @@ export function PlaceResultCard({ place, onAdd, hoveredPlace, setHoveredPlace }:
 
    return (
       <Card
-         onMouseEnter={() => setHoveredPlace(place.id)}
-         onMouseLeave={() => setHoveredPlace(null)}
+         onClick={() => {
+            if (hoveredPlace !== place.id) setHoveredPlace(place.id);
+            else setHoveredPlace(null);
+         }}
          className={cn(
             "transition-all duration-200 ease-in-out relative",
             hoveredPlace === place.id ? "bg-neutral-700" : "hover:bg-neutral-700"
@@ -64,9 +66,7 @@ export function PlaceResultCard({ place, onAdd, hoveredPlace, setHoveredPlace }:
                   setButtonText("Adding...");
                   setDisabled(true);
                   const success = await onAdd(place);
-                  if (success) {
-                     setButtonText("Added!");
-                  }
+                  if (success) setButtonText("Added!");
                   else {
                      setButtonText("Failed. Try again");
                      setDisabled(false);
