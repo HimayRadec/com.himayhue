@@ -1,16 +1,16 @@
 'use client'
 // React
 import { useState, useEffect } from 'react'
-import { Suspense } from 'react'
 
 // Next.js & Routing
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import type { Metadata } from "next";
+
 
 // Components
 import GoogleMap from './components/GoogleMap'
-import { PlaceResultCard } from './components/PlaceResultCard'
 import PlacesSearchbar from './components/PlaceSearchbar'
+import { PlaceResultCard } from './components/PlaceResultCard'
 import { BucketPlaceCard } from './components/BucketPlaceCard'
 
 // UI
@@ -22,6 +22,30 @@ import { getBucketList, removePlaceFromBucketList, addPlaceToBucketList, markPla
 
 // Types
 import { BucketListPlace } from '@/types/bucketListTypes'
+
+
+export const metadata: Metadata = {
+  title: "Bucket List - Create and Share Bucket Lists!",
+  description: "Create your ultimate bucket list using Google Maps. Save dream destinations, organize your trips, and easily share them with friends.",
+  openGraph: {
+    title: "Bucket List - Create and Share Bucket Lists!",
+    description: "Plan, save, and share your dream destinations using our interactive bucket list app powered by Google Maps.",
+    url: "https://himayhue.com/bucketlist",
+    siteName: "Himay's Developer Projects",
+    images: [
+      {
+        url: "/bucketlist-og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Bucket List OpenGraph Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  themeColor: "#dc2626",
+};
+
 
 
 export default function BucketList() {
@@ -200,3 +224,24 @@ export default function BucketList() {
     </div>
   );
 }
+
+/*
+TODOS:
+- Display total number of places in the bucket list
+- Add a button to clear the bucket list
+- Fix the website button being too wide
+- Add tags
+- Improve Places Card UI
+- Combine PlaceResultCard and BucketPlaceCard into a single component with conditional rendering for buttons
+- Add a loading state when fetching bucket list or adding/removing places
+- Add error handling and user feedback (toasts or alerts) for actions like adding/removing places
+- Implement pagination or infinite scroll for search results if there are many places
+- Add a filter to show only visited or unvisited places in the bucket list
+- Add a way to sort places in the bucket list (e.g., by date added, name, etc.)
+- Allow users to edit place details in the bucket list (e.g., change name, address, etc.)
+- Add a way to share the bucket list with friends or on social media
+- Add a way to export the bucket list to a file (e.g., JSON, CSV)
+- Allow collaborative editing of the bucket list with friends
+- Add a way to categorize places in the bucket list (e.g., by type, location, etc.)
+- Allow dropping pins on the map to add custom locations to the bucket listw
+*/

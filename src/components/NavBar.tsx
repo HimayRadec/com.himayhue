@@ -12,12 +12,12 @@ export default function NavBar() {
    const links = ["bucketList"]
 
    return (
-      <header className="sticky w-full top-0 bg-background px-3 shadow-sm">
+      <header className="sticky w-full top-0 bg-background px-3 shadow-sm border-b">
          <nav className="mx-auto flex h-14 items-center justify-between gap-3">
             <div>
                <Link href="/" className="">
                   Home
-               </Link>
+               </Link>s
                <Link href="/bucketList" className="ml-4">
                   Bucket List
                </Link>

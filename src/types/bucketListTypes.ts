@@ -25,9 +25,9 @@ export interface BucketListDocument {
 }
 
 export enum PinColor {
-   Visited = '#00A000',   // ✅ Green for visited spots
-   Unvisited = '#808080', // ❌ Gray for unvisited spots
-   Result = '#DC2626',    // 🔍 Red for search results
-   Hovered = '#000000',   // ⚪ Optional: Black border for hovered spots
+   Visited = '#00A000',   // Green 
+   Unvisited = '#808080', // Gray 
+   Result = '#DC2626',    // Red 
+   Hovered = '#000000',   // Black 
 }
 

@@ -1,4 +1,4 @@
-import { Lock, LogOut, Settings } from "lucide-react";
+import { Users, Lock, LogOut, Settings } from "lucide-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -33,8 +33,14 @@ export default function UserButton({ user }: UserButtonProps) {
             </Button>
          </DropdownMenuTrigger>
          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>{user.name || "User"}</DropdownMenuLabel>
+            <DropdownMenuItem>
+               <Link href={`/account/friends`} className="flex items-center gap-2">
+                  <Users className="h-4 w-4" /><span>Friends</span>
+               </Link>
+            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
                <DropdownMenuItem asChild>
                   <Link href="/settings">
@@ -51,7 +57,9 @@ export default function UserButton({ user }: UserButtonProps) {
             </DropdownMenuItem>
           )} */}
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem asChild>
                <button
                   onClick={() => signOut({ callbackUrl: "/" })}
@@ -60,6 +68,7 @@ export default function UserButton({ user }: UserButtonProps) {
                   <LogOut className="mr-2 h-4 w-4" /> Sign Out
                </button>
             </DropdownMenuItem>
+
          </DropdownMenuContent>
       </DropdownMenu>
    );
