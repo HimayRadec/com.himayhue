@@ -24,27 +24,27 @@ import { getBucketList, removePlaceFromBucketList, addPlaceToBucketList, markPla
 import { BucketListPlace } from '@/types/bucketListTypes'
 
 
-export const metadata: Metadata = {
-  title: "Bucket List - Create and Share Bucket Lists!",
-  description: "Create your ultimate bucket list using Google Maps. Save dream destinations, organize your trips, and easily share them with friends.",
-  openGraph: {
-    title: "Bucket List - Create and Share Bucket Lists!",
-    description: "Plan, save, and share your dream destinations using our interactive bucket list app powered by Google Maps.",
-    url: "https://himayhue.com/bucketlist",
-    siteName: "Himay's Developer Projects",
-    images: [
-      {
-        url: "/bucketlist-og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Bucket List OpenGraph Preview",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  themeColor: "#dc2626",
-};
+// export const metadata: Metadata = {
+//   title: "Bucket List - Create and Share Bucket Lists!",
+//   description: "Create your ultimate bucket list using Google Maps. Save dream destinations, organize your trips, and easily share them with friends.",
+//   openGraph: {
+//     title: "Bucket List - Create and Share Bucket Lists!",
+//     description: "Plan, save, and share your dream destinations using our interactive bucket list app powered by Google Maps.",
+//     url: "https://himayhue.com/bucketlist",
+//     siteName: "Himay's Developer Projects",
+//     images: [
+//       {
+//         url: "/bucketlist-og-image.png",
+//         width: 1200,
+//         height: 630,
+//         alt: "Bucket List OpenGraph Preview",
+//       },
+//     ],
+//     locale: "en_US",
+//     type: "website",
+//   },
+//   themeColor: "#dc2626",
+// };
 
 
 
@@ -141,6 +141,12 @@ export default function BucketList() {
     }
   }
 
+  /** Handles toggling the visited state of a place in the bucket list.
+    @param placeId - The ID of the place to toggle.
+    @param visited - The new visited state (true for visited, false for unvisited).
+    @returns {Promise<boolean>} - A promise that resolves to true if the state was toggled successfully, false otherwise.
+    @throws Will log an error if the toggle fails.
+   * */
   async function handleToggleVisited(placeId: string, visited: boolean): Promise<boolean> {
     if (!userId) return false;
     try {
@@ -167,7 +173,10 @@ export default function BucketList() {
     }
   }
 
-
+  /** Handles the results from the Places Searchbar.
+    @param results - An array of google.maps.places.Place objects.
+    @returns {void}
+   * */
   function handleSearchbarResults(results: google.maps.places.Place[]) {
     // filter out places that are already in the bucket list
     const filteredPlaceResults = results.filter(place => !bucketListPlaces.some(bucketPlace => bucketPlace.id === place.id));
@@ -177,50 +186,74 @@ export default function BucketList() {
 
 
   return (
-    <div className="flex flex-grow overflow-hidden">
+    <div className="flex flex-grow overflow-hidden h-full">
       {/* Map Section */}
       <GoogleMap searchResultPlaces={placesResults} bucketListPlaces={bucketListPlaces} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} />
 
       {/* Sidebar */}
-      <div className="w-1/3 bg-neutral-950 flex flex-col border-neutral-800 ">
-        <div className="w-full border-neutral-800 flex flex-col justify-between items-center">
+      <div className="w-1/3 bg-neutral-950 flex flex-col h-screen">
+        <Tabs defaultValue="bucket-list" className="w-full h-full flex flex-col">
+          <TabsList className="w-full">
+            <TabsTrigger value="bucket-list" className="w-1/2 rounded-none">
+              Bucket List
+            </TabsTrigger>
+            <TabsTrigger value="search" className="w-1/2 rounded-none">
+              Search
+            </TabsTrigger>
+          </TabsList>
 
-          <Tabs defaultValue='bucket-list' className='w-full rounded-none border-t'>
-            <TabsList className='w-full'>
-              <TabsTrigger value='bucket-list' className='w-1/2 h-full rounded-none'>Bucket List</TabsTrigger>
-              <TabsTrigger value='search' className='w-1/2 h-full rounded-none'>Search</TabsTrigger>
-            </TabsList>
-
-            {/* Forced mount is used to keep the content mounted even when inactive to prevent card button states from resetting. */}
-            <TabsContent value='bucket-list' className='data-[state=inactive]:hidden' forceMount>
-              <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
+          <div className="flex-1 overflow-hidden">
+            <TabsContent
+              value="bucket-list"
+              className="data-[state=inactive]:hidden h-full"
+              forceMount
+            >
+              <ScrollArea className="h-full w-full">
                 {bucketListPlaces.length === 0 ? (
-                  <p className="text-gray-400 text-center py-4">Your bucket list is empty.</p>
+                  <p className="text-gray-400 text-center py-4">
+                    Your bucket list is empty.
+                  </p>
                 ) : (
                   bucketListPlaces.map((place) => (
-                    <BucketPlaceCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onRemove={handleRemovePlaceToBucketList} toggleVisit={handleToggleVisited} />
+                    <BucketPlaceCard
+                      key={place.id}
+                      place={place}
+                      hoveredPlace={hoveredPlace}
+                      setHoveredPlace={setHoveredPlace}
+                      onRemove={handleRemovePlaceToBucketList}
+                      toggleVisit={handleToggleVisited}
+                    />
                   ))
                 )}
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value='search' className='data-[state=inactive]:hidden' forceMount>
+            <TabsContent
+              value="search"
+              className="data-[state=inactive]:hidden h-full"
+              forceMount
+            >
               <PlacesSearchbar UpdatePlacesResults={handleSearchbarResults} />
-
-              <ScrollArea className="w-full flex flex-col max-h-[calc(100vh-8rem)] ">
+              <ScrollArea className="h-full w-full">
                 {placesResults.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
-                  placesResults.map((place, index) => (
-                    <PlaceResultCard key={place.id} place={place} hoveredPlace={hoveredPlace} setHoveredPlace={setHoveredPlace} onAdd={handleAddPlaceToBucketList} />
+                  placesResults.map((place) => (
+                    <PlaceResultCard
+                      key={place.id}
+                      place={place}
+                      hoveredPlace={hoveredPlace}
+                      setHoveredPlace={setHoveredPlace}
+                      onAdd={handleAddPlaceToBucketList}
+                    />
                   ))
                 )}
               </ScrollArea>
             </TabsContent>
-
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </div>
+
     </div>
   );
 }

@@ -51,13 +51,16 @@ export default async function RootLayout({
       <body className={`${inter.className} h-screen flex flex-col`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
           <SessionProvider>
             <NavBar />
-            {children}
+            {/* <main className="flex-1 p-4 overflow-y-auto"> */}
+            <main className="pl-60 min-h-screen h-full">
+              {children}
+            </main>
           </SessionProvider>
         </ThemeProvider>
       </body>
