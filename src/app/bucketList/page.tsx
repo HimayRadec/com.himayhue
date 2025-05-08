@@ -192,12 +192,12 @@ export default function BucketList() {
 
       {/* Sidebar */}
       <div className="w-1/3 bg-neutral-950 flex flex-col h-screen">
-        <Tabs defaultValue="bucket-list" className="w-full h-full flex flex-col">
-          <TabsList className="w-full">
+        <Tabs defaultValue="bucket-list" className="w-full h-full flex flex-col p-0">
+          <TabsList className="w-full p-0">
             <TabsTrigger value="bucket-list" className="w-1/2 rounded-none">
               Bucket List
             </TabsTrigger>
-            <TabsTrigger value="search" className="w-1/2 rounded-none">
+            <TabsTrigger value="search p-0" className="w-1/2 rounded-none">
               Search
             </TabsTrigger>
           </TabsList>

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://himayhue.com'),
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: 'any', type: 'image/x-icon' },
       { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
     ],
@@ -38,7 +39,6 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  themeColor: "#dc2626",
 };
 
 export default async function RootLayout({
@@ -55,7 +55,11 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionProvider>
+          <SessionProvider
+            refetchInterval={0}
+            refetchOnWindowFocus={false}
+            refetchWhenOffline={false}
+          >
             <NavBar />
             {/* <main className="flex-1 p-4 overflow-y-auto"> */}
             <main className="pl-60 min-h-screen h-full">
