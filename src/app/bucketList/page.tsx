@@ -197,7 +197,7 @@ export default function BucketList() {
             <TabsTrigger value="bucket-list" className="w-1/2 rounded-none">
               Bucket List
             </TabsTrigger>
-            <TabsTrigger value="search p-0" className="w-1/2 rounded-none">
+            <TabsTrigger value="search" className="w-1/2 rounded-none">
               Search
             </TabsTrigger>
           </TabsList>
@@ -234,7 +234,7 @@ export default function BucketList() {
               forceMount
             >
               <PlacesSearchbar UpdatePlacesResults={handleSearchbarResults} />
-              <ScrollArea className="h-full w-full">
+              <ScrollArea className="w-full flex-1 border-bg-white">
                 {placesResults.length === 0 ? (
                   <p className="text-gray-400 text-center py-4">No results found</p>
                 ) : (
