@@ -57,7 +57,7 @@ export default function NavBar() {
             {/* Profile Link */}
             <div className="w-full pb-2">
                <NavItem
-                  href="#"
+                  href="/profile"
                   icon={
                      <Image
                         src="/avatar_placeholder.png"

@@ -194,10 +194,10 @@ export default function BucketList() {
       <div className="w-1/3 bg-neutral-950 flex flex-col h-screen">
         <Tabs defaultValue="bucket-list" className="w-full h-full flex flex-col p-0">
           <TabsList className="w-full p-0">
-            <TabsTrigger value="bucket-list" className="w-1/2 rounded-none">
+            <TabsTrigger value="bucket-list" className="w-1/2 rounded-none h-full">
               Bucket List
             </TabsTrigger>
-            <TabsTrigger value="search" className="w-1/2 rounded-none">
+            <TabsTrigger value="search" className="w-1/2 rounded-none h-full">
               Search
             </TabsTrigger>
           </TabsList>
