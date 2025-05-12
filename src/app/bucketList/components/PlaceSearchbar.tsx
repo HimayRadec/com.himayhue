@@ -81,12 +81,12 @@ export default function PlacesSearchbar({ UpdatePlacesResults }: PlacesSearchbar
                      </FormItem>
                   )}
                />
-               <Button type="submit" variant="blank">
+               <Button type="submit" variant="ghost">
                   <BiSearch />
                </Button>
                <Button
                   type="button"
-                  variant="blank"
+                  variant="ghost"
                   onClick={() => {
                      form.setValue("searchInput", "");
                      UpdatePlacesResults([]);

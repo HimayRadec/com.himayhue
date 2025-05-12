@@ -25,9 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Add Mongo _id to session
       async session({ session, token }) {
-         if (token?.id) {
-            session.user.id = token.id as string;
-         }
+         if (token?.id) session.user.id = token.id as string;
          return session;
       },
    },
